@@ -1,0 +1,19 @@
+.suggested-products {
+    background-color: #f9fafb;
+}
+
+.suggested-products .product-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.suggested-products .product-card:hover {
+    transform: translateY(-4px);
+}
+
+.suggested-products img {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.suggested-products .product-card:hover img {
+    opacity: 0.9;
+}
