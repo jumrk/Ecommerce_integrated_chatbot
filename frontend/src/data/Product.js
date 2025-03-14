@@ -147,6 +147,125 @@ const products = [
             'OneSize-black': 25,
             'OneSize-white': 20
         }
+    },
+    {
+        id: 6,
+        name: 'Túi Tote Canvas',
+        price: 200000,
+        images: [
+            'https://i.pinimg.com/736x/fe/8f/ce/fe8fceb06d3132d5f578427d5e2294b5.jpg',
+            'https://i.pinimg.com/736x/1f/23/76/1f2376ac692d97d76e02145b0243cf99.jpg',
+            'https://i.pinimg.com/736x/9e/41/8f/9e418f03e1da0adfa19f254a1f37d3c4.jpg',
+            'https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg'
+        ],
+        category: 'Phụ kiện',
+        colors: ['beige', 'black', 'white'],
+        sizes: ['One size'],
+        description: 'Túi tote vải canvas cao cấp',
+        specifications: {
+            material: 'Canvas 12oz',
+            style: 'Casual',
+            fit: 'Large capacity',
+            origin: 'Việt Nam',
+            washCare: 'Giặt tay với nước lạnh'
+        },
+        discount: 15,
+        rating: 4.6,
+        reviews: 78,
+        stock: {
+            'OneSize-beige': 30,
+            'OneSize-black': 25,
+            'OneSize-white': 20
+        }
+    },
+    {
+        id: 7,
+        name: 'Túi Tote Canvas',
+        price: 200000,
+        images: [
+            'https://i.pinimg.com/736x/fe/8f/ce/fe8fceb06d3132d5f578427d5e2294b5.jpg',
+            'https://i.pinimg.com/736x/1f/23/76/1f2376ac692d97d76e02145b0243cf99.jpg',
+            'https://i.pinimg.com/736x/9e/41/8f/9e418f03e1da0adfa19f254a1f37d3c4.jpg',
+            'https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg'
+        ],
+        category: 'Phụ kiện',
+        colors: ['beige', 'black', 'white'],
+        sizes: ['One size'],
+        description: 'Túi tote vải canvas cao cấp',
+        specifications: {
+            material: 'Canvas 12oz',
+            style: 'Casual',
+            fit: 'Large capacity',
+            origin: 'Việt Nam',
+            washCare: 'Giặt tay với nước lạnh'
+        },
+        discount: 15,
+        rating: 4.6,
+        reviews: 78,
+        stock: {
+            'OneSize-beige': 30,
+            'OneSize-black': 25,
+            'OneSize-white': 20
+        }
+    },
+    {
+        id: 8,
+        name: 'Túi Tote Canvas',
+        price: 200000,
+        images: [
+            'https://i.pinimg.com/736x/fe/8f/ce/fe8fceb06d3132d5f578427d5e2294b5.jpg',
+            'https://i.pinimg.com/736x/1f/23/76/1f2376ac692d97d76e02145b0243cf99.jpg',
+            'https://i.pinimg.com/736x/9e/41/8f/9e418f03e1da0adfa19f254a1f37d3c4.jpg',
+            'https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg'
+        ],
+        category: 'Phụ kiện',
+        colors: ['beige', 'black', 'white'],
+        sizes: ['One size'],
+        description: 'Túi tote vải canvas cao cấp',
+        specifications: {
+            material: 'Canvas 12oz',
+            style: 'Casual',
+            fit: 'Large capacity',
+            origin: 'Việt Nam',
+            washCare: 'Giặt tay với nước lạnh'
+        },
+        discount: 15,
+        rating: 4.6,
+        reviews: 78,
+        stock: {
+            'OneSize-beige': 30,
+            'OneSize-black': 25,
+            'OneSize-white': 20
+        }
+    }, {
+        id: 9,
+        name: 'Túi Tote Canvas',
+        price: 200000,
+        images: [
+            'https://i.pinimg.com/736x/fe/8f/ce/fe8fceb06d3132d5f578427d5e2294b5.jpg',
+            'https://i.pinimg.com/736x/1f/23/76/1f2376ac692d97d76e02145b0243cf99.jpg',
+            'https://i.pinimg.com/736x/9e/41/8f/9e418f03e1da0adfa19f254a1f37d3c4.jpg',
+            'https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg'
+        ],
+        category: 'Phụ kiện',
+        colors: ['beige', 'black', 'white'],
+        sizes: ['One size'],
+        description: 'Túi tote vải canvas cao cấp',
+        specifications: {
+            material: 'Canvas 12oz',
+            style: 'Casual',
+            fit: 'Large capacity',
+            origin: 'Việt Nam',
+            washCare: 'Giặt tay với nước lạnh'
+        },
+        discount: 15,
+        rating: 4.6,
+        reviews: 78,
+        stock: {
+            'OneSize-beige': 30,
+            'OneSize-black': 25,
+            'OneSize-white': 20
+        }
     }
 ];
 

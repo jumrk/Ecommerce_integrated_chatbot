@@ -1,5 +1,8 @@
 import React, { useState, useRef } from 'react';
 import CardReview from '../card/CardReview';
+import { RotateInWhenVisible } from '../animation/RotateInWhenVisible';
+import { ScaleUpWhenVisible } from '../animation/ScaleUpWhenVisible';
+import { SlideInWhenVisible } from '../animation/SlideInWhenVisible';
 const CustomerReviews = () => {
     const sliderRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -88,8 +91,13 @@ const CustomerReviews = () => {
     return (
         <section className="py-12 bg-gray-50 relative">
             <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-800">ĐÁNH GIÁ KHÁCH HÀNG</h2>
-                <p className="text-gray-600 mt-2">Ý kiến từ những khách hàng hài lòng nhất của chúng tôi!</p>
+                <RotateInWhenVisible delay={0.2}>
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-800">ĐÁNH GIÁ KHÁCH HÀNG</h2>
+                </RotateInWhenVisible>
+
+                <ScaleUpWhenVisible delay={0.2}>
+                    <p className="text-gray-600 mt-2">Ý kiến từ những khách hàng hài lòng nhất của chúng tôi!</p>
+                </ScaleUpWhenVisible>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,7 +110,9 @@ const CustomerReviews = () => {
                     onMouseLeave={handleMouseUp}
                 >
                     {reviews.map((review) => (
-                        <CardReview key={review.id} rating={review.rating} id={review.id} namePerson={review.name} comment={review.comment} date={review.date} />
+                        <SlideInWhenVisible key={review.id} delay={0.2}>
+                            <CardReview rating={review.rating} id={review.id} namePerson={review.name} comment={review.comment} date={review.date} />
+                        </SlideInWhenVisible>
                     ))}
                 </div>
             </div>

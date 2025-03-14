@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
+import { ScaleUpWhenVisible } from '../animation/ScaleUpWhenVisible';
+import { SlideInWhenVisible } from '../animation/SlideInWhenVisible';
 const FashionBlog = () => {
     const blogPosts = [
         {
@@ -87,112 +88,130 @@ const FashionBlog = () => {
     return (
         <section className="py-12 bg-gray-100">
             <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-800">BLOG & LOOKBOOK THỜI TRANG</h2>
-                <p className="text-gray-600 mt-2">Cập nhật xu hướng, mẹo phối đồ và cảm hứng từ cộng đồng!</p>
+                <ScaleUpWhenVisible delay={0.2}>
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-800">BLOG & LOOKBOOK THỜI TRANG</h2>
+                </ScaleUpWhenVisible>
+
+                <SlideInWhenVisible direction="down" delay={0.2}>
+                    <p className="text-gray-600 mt-2">Cập nhật xu hướng, mẹo phối đồ và cảm hứng từ cộng đồng!</p>
+                </SlideInWhenVisible>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 bento-container">
 
-                <div className="md:col-span-2 bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[0].image}
-                        alt={blogPosts[0].title}
-                        className="w-full h-64 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-6">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[0].type}</span>
-                        <h3 className="text-xl font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[0].id}`}>
-                                {blogPosts[0].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[0].excerpt}</p>
-                    </div>
-                </div>
-
-                <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[1].image}
-                        alt={blogPosts[1].title}
-                        className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-4">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[1].type}</span>
-                        <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[1].id}`}>
-                                {blogPosts[1].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[1].excerpt}</p>
-                    </div>
-                </div>
-
-                <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[2].image}
-                        alt={blogPosts[2].title}
-                        className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-4">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[2].type}</span>
-                        <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
-                                {blogPosts[2].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[2].excerpt}</p>
-                    </div>
-                </div>
 
                 <div className="md:col-span-2 bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[3].image}
-                        alt={blogPosts[3].title}
-                        className="w-full h-64 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-6">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[3].type}</span>
-                        <h3 className="text-xl font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
-                                {blogPosts[3].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[3].excerpt}</p>
-                    </div>
+                    <SlideInWhenVisible direction="left" delay={0.2}>
+                        <img
+                            src={blogPosts[0].image}
+                            alt={blogPosts[0].title}
+                            className="w-full h-64 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-6">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[0].type}</span>
+                            <h3 className="text-xl font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[0].id}`}>
+                                    {blogPosts[0].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[0].excerpt}</p>
+                        </div>
+                    </SlideInWhenVisible>
                 </div>
 
                 <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[4].image}
-                        alt={blogPosts[4].title}
-                        className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-4">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[4].type}</span>
-                        <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
-                                {blogPosts[4].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[4].excerpt}</p>
-                    </div>
+                    <SlideInWhenVisible direction="up" delay={0.2}>
+                        <img
+                            src={blogPosts[1].image}
+                            alt={blogPosts[1].title}
+                            className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-4">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[1].type}</span>
+                            <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[1].id}`}>
+                                    {blogPosts[1].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[1].excerpt}</p>
+                        </div>
+                    </SlideInWhenVisible>
                 </div>
 
                 <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                    <img
-                        src={blogPosts[5].image}
-                        alt={blogPosts[5].title}
-                        className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
-                    />
-                    <div className="p-4">
-                        <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[5].type}</span>
-                        <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
-                            <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
-                                {blogPosts[5].title}
-                            </Link>
-                        </h3>
-                        <p className="text-gray-600 mt-2">{blogPosts[5].excerpt}</p>
-                    </div>
+                    <SlideInWhenVisible direction="up" delay={0.2}>
+                        <img
+                            src={blogPosts[2].image}
+                            alt={blogPosts[2].title}
+                            className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-4">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[2].type}</span>
+                            <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
+                                    {blogPosts[2].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[2].excerpt}</p>
+                        </div>
+                    </SlideInWhenVisible>
+                </div>
+
+                <div className="md:col-span-2 bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                    <SlideInWhenVisible direction="right" delay={0.2}>
+                        <img
+                            src={blogPosts[3].image}
+                            alt={blogPosts[3].title}
+                            className="w-full h-64 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-6">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[3].type}</span>
+                            <h3 className="text-xl font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
+                                    {blogPosts[3].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[3].excerpt}</p>
+                        </div>
+                    </SlideInWhenVisible>
+                </div>
+
+                <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                    <ScaleUpWhenVisible delay={0.2} >
+                        <img
+                            src={blogPosts[4].image}
+                            alt={blogPosts[4].title}
+                            className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-4">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[4].type}</span>
+                            <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
+                                    {blogPosts[4].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[4].excerpt}</p>
+                        </div>
+                    </ScaleUpWhenVisible>
+                </div>
+
+                <div className="bento-card transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                    <ScaleUpWhenVisible delay={0.3} >
+                        <img
+                            src={blogPosts[5].image}
+                            alt={blogPosts[5].title}
+                            className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:brightness-110"
+                        />
+                        <div className="p-4">
+                            <span className="text-sm text-indigo-600 font-semibold uppercase">{blogPosts[5].type}</span>
+                            <h3 className="text-lg font-bold text-gray-800 mt-2 group-hover:text-indigo-600 transition-colors duration-300">
+                                <Link to={`/directory/fashion-blog/${blogPosts[2].id}`}>
+                                    {blogPosts[5].title}
+                                </Link>
+                            </h3>
+                            <p className="text-gray-600 mt-2">{blogPosts[5].excerpt}</p>
+                        </div>
+                    </ScaleUpWhenVisible>
                 </div>
             </div>
         </section >

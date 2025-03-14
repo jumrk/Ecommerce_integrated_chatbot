@@ -1,169 +1,161 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
-import { ButtonBlack } from '../../button/Button';
-import './Hero.css';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const Hero = () => {
-    const [mainImageId, setMainImageId] = useState(1);
-    const scrollRef = useRef(null);
-    const [text, setText] = useState('');
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [loopNum, setLoopNum] = useState(0);
-    const messages = [
-        "Hãy trải nghiệm những sản phẩm tuyệt vời của chúng tôi!",
-        "Lựa chọn sản phẩm theo phong cách của bạn"
-    ];
-    const period = 3000;
-    const [delta, setDelta] = useState(80);
+    const [currentSlide, setCurrentSlide] = useState(0);
 
-    const images = [
-        { id: 1, src: 'images/HeroImg/banner4.png' },
-        { id: 2, src: 'images/HeroImg/banner5.png' },
-        { id: 3, src: 'images/HeroImg/banner5.png' },
-        { id: 4, src: 'images/HeroImg/banner5.png' },
+    const slides = [
+        {
+            image: 'images/HeroImg/banner3.png',
+            category: 'Bộ Sưu Tập Mới',
+            title: 'MINIMALIST\nESSENTIALS',
+            description: 'Khám phá những thiết kế tối giản, hiện đại và sang trọng. Định hình phong cách của bạn với BST mới nhất.'
+        },
+        {
+            image: 'images/HeroImg/banner4.png',
+            category: 'Xu Hướng 2024',
+            title: 'URBAN\nSTREET STYLE',
+            description: 'Phong cách đường phố cá tính, năng động với những item must-have của năm 2024.'
+        },
+        {
+            image: 'images/HeroImg/banner5.png',
+            category: 'Limited Edition',
+            title: 'LUXURY\nCOLLECTION',
+            description: 'Bộ sưu tập giới hạn với những thiết kế độc quyền, đẳng cấp và thời thượng.'
+        }
     ];
-
-    const mainImage = images.find((img) => img.id === mainImageId).src;
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setMainImageId((prevId) => {
-                const currentIndex = images.findIndex((img) => img.id === prevId);
-                const nextIndex = (currentIndex + 1) % images.length;
-                return images[nextIndex].id;
-            });
-        }, 5000);
-
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }, 6000);
         return () => clearInterval(interval);
-    }, [images]);
+    }, []);
 
-    useEffect(() => {
-        const slider = scrollRef.current;
-        if (!slider) return;
-
-        const activeImage = slider.querySelector(`[data-id="${mainImageId}"]`);
-        if (activeImage) {
-            const sliderWidth = slider.clientWidth;
-            const imageWidth = activeImage.offsetWidth;
-            const scrollPosition = activeImage.offsetLeft - (sliderWidth / 2) + (imageWidth / 2);
-            slider.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+    // Variants cho slide animation
+    const slideVariants = (direction, distance = 100) => ({
+        hidden: {
+            x: direction === 'left' ? -distance : direction === 'right' ? distance : 0,
+            y: direction === 'up' ? -distance : direction === 'down' ? distance : 0,
+            opacity: 0
+        },
+        visible: {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            transition: {
+                duration: 0.6,
+                ease: 'easeOut'
+            }
         }
-    }, [mainImageId]);
-
-    useEffect(() => {
-        let ticker = setInterval(() => {
-            tick();
-        }, delta);
-
-        return () => clearInterval(ticker);
-    }, [text, isDeleting]);
-
-    const tick = () => {
-        let i = loopNum % messages.length;
-        let fullText = messages[i];
-        let updatedText = isDeleting
-            ? fullText.substring(0, text.length - 1)
-            : fullText.substring(0, text.length + 1);
-
-        setText(updatedText);
-
-        if (isDeleting) {
-            setDelta(30);
-        }
-
-        if (!isDeleting && updatedText === fullText) {
-            setIsDeleting(true);
-            setDelta(period);
-        } else if (isDeleting && updatedText === '') {
-            setIsDeleting(false);
-            setLoopNum(loopNum + 1);
-            setDelta(80);
-        } else if (!isDeleting) {
-            setDelta(80 + Math.random() * 20);
-        }
-    };
-
-    const handleImageClick = (id) => {
-        setMainImageId(id);
-    };
-
-    const scrollLeft = () => {
-        const slider = scrollRef.current;
-        if (slider) {
-            slider.scrollBy({ left: -300, behavior: 'smooth' });
-        }
-    };
-
-    const scrollRight = () => {
-        const slider = scrollRef.current;
-        if (slider) {
-            slider.scrollBy({ left: 300, behavior: 'smooth' });
-        }
-    };
+    });
 
     return (
-        <section className="relative bg-white min-h-screen flex flex-col items-center md:items-start overflow-hidden">
-            <div
-                className="absolute top-0 left-0 w-full h-[100vh] pointer-events-none"
-                style={{
-                    background: 'linear-gradient(135deg, rgba(255, 182, 193, 0.4) 0%, rgba(173, 216, 230, 0.3) 50%, rgba(255, 255, 255, 0) 100%)',
-                    clipPath: 'ellipse(80% 60% at 30% 20%)',
-                }}
-            ></div>
+        <section className="relative bg-[#f8f8f8] min-h-screen md:h-[90vh] flex items-center overflow-hidden">
+            {/* Background Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 opacity-50" />
 
+            <div className="container mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-0 md:-mt-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                    {/* Text Content */}
+                    <div className="z-10 space-y-4 md:space-y-5 max-w-2xl order-2 lg:order-1 text-center lg:text-left">
+                        <motion.div
+                            key={`category-${currentSlide}`}
+                            variants={slideVariants('up')}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.3 }}
+                            className="inline-block text-gray-600 text-sm md:text-base tracking-wider uppercase font-medium border-b-2 border-gray-200 pb-1"
+                        >
+                            {slides[currentSlide].category}
+                        </motion.div>
 
-            <div className="relative md:absolute md:inset-0 flex items-center justify-center w-full mt-4 md:mt-0">
-                <img
-                    src={mainImage}
-                    alt="Central fashion model"
-                    className="w-auto drop-shadow-2xl h-[50vh] md:h-[90vh] object-contain z-0 md:z-20"
-                />
-            </div>
+                        <motion.div
+                            key={`title-${currentSlide}`}
+                            variants={slideVariants('down', 150)}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.3 }}
+                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight tracking-tight"
+                        >
+                            {slides[currentSlide].title.split('\n').map((line, i) => (
+                                <div key={i} className="overflow-hidden hover:translate-x-2 transition-all duration-300">
+                                    {line}
+                                </div>
+                            ))}
+                        </motion.div>
 
-            <div className="relative z-10 w-full text-center md:text-left px-4 md:pl-8 lg:pl-16 xl:pl-20 2xl:pl-28 md:pr-8 lg:pr-16 xl:pr-20 pt-8 md:pt-24">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-[#515151] drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] tracking-wider mb-4 leading-tight transform hover:scale-105 transition-transform duration-300">
-                    THỜI TRANG THEO <br /> XU HƯỚNG <br /> CỦA BẠN
-                </h1>
-                <p className="text-sm md:text-base lg:text-lg xl:text-xl text-[#6A695B] mb-6 md:mb-8 drop-shadow-md font-medium h-[3em] flex items-center justify-center md:justify-start">
-                    <span className="typing-text">{text}</span>
-                    <span className="typing-cursor">|</span>
-                </p>
-                <ButtonBlack text="Xem ngay" />
-            </div>
+                        <motion.div
+                            key={`desc-${currentSlide}`}
+                            variants={slideVariants('left')}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.3 }}
+                            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 font-light leading-relaxed"
+                        >
+                            {slides[currentSlide].description}
+                        </motion.div>
 
-            <div className="hidden md:flex absolute top-1/2 right-2 md:right-8 lg:right-10 transform -translate-y-1/2 z-10 max-w-[60vw] md:max-w-[40vw] lg:max-w-[30vw] flex-col items-center gap-4">
-                <div
-                    ref={scrollRef}
-                    className="flex flex-row md:p-10 space-x-6 overflow-x-auto scrollbar-hidden snap-x snap-mandatory"
-                >
-                    {images.map((image) => (
+                        <motion.div
+                            key={`button-${currentSlide}`}
+                            variants={slideVariants('right')}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.3 }}
+                            className="pt-2 md:pt-4"
+                        >
+                            <button className="bg-black text-white px-6 md:px-10 py-2.5 md:py-3.5 rounded-none 
+                                text-sm md:text-base tracking-wider uppercase font-medium 
+                                transition-all duration-300 hover:bg-gray-800
+                                focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+                                Khám phá ngay
+                            </button>
+                        </motion.div>
+                    </div>
+
+                    {/* Image */}
+                    <motion.div
+                        key={`image-${currentSlide}`}
+                        variants={slideVariants('right', 200)}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: false, amount: 0.3 }}
+                        className="relative h-[45vh] md:h-[60vh] lg:h-[75vh] flex items-center justify-center overflow-hidden order-1 lg:order-2"
+                    >
                         <img
-                            key={image.id}
-                            data-id={image.id}
-                            src={image.src}
-                            alt={image.alt}
-                            className={`w-32 md:w-36 lg:w-36 h-36 md:h-36 lg:h-36 object-contain rounded-xl border-2 cursor-pointer transition-all duration-300 flex-shrink-0 snap-center ${image.id === mainImageId
-                                ? 'opacity-100 brightness-100 border-gray-800 shadow-xl scale-105 z-20'
-                                : 'opacity-50 brightness-75 border-gray-200 shadow-md z-10'
-                                }`}
-                            onClick={() => handleImageClick(image.id)}
+                            src={slides[currentSlide].image}
+                            alt={slides[currentSlide].title}
+                            className="absolute h-full w-auto object-contain"
                         />
-                    ))}
+                    </motion.div>
                 </div>
 
-                <div className="flex space-x-4">
-                    <button
-                        onClick={scrollLeft}
-                        className="bg-gray-200 text-black text-xl md:text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-300"
-                    >
-                        <FaAngleLeft />
-                    </button>
-                    <button
-                        onClick={scrollRight}
-                        className="bg-gray-200 text-black text-xl md:text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-300"
-                    >
-                        <FaAngleRight />
-                    </button>
+                {/* Navigation Controls */}
+                <div className="flex justify-between items-center w-full absolute bottom-4 md:bottom-8 left-0 px-4 md:px-8 lg:px-12">
+                    {/* Dots Navigation */}
+                    <div className="flex space-x-2 md:space-x-3">
+                        {slides.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setCurrentSlide(index)}
+                                className={`h-1.5 md:h-2 transition-all duration-300 
+                                    ${index === currentSlide
+                                        ? 'bg-black w-6 md:w-10'
+                                        : 'bg-gray-300 w-4 md:w-5 hover:bg-gray-400'
+                                    }`}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Slide Counter */}
+                    <div className="text-sm md:text-base font-medium hover:scale-110 transition-all duration-300">
+                        <span className="text-black">
+                            {(currentSlide + 1).toString().padStart(2, '0')}
+                        </span>
+                        <span className="text-gray-400">
+                            /{slides.length.toString().padStart(2, '0')}
+                        </span>
+                    </div>
                 </div>
             </div>
         </section>
