@@ -346,7 +346,7 @@ const OrderDetailPage = () => {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Phương thức thanh toán</span>
                                         <span className="font-medium">{order.paymentMethod}</span>
-                                    </div>
+                                    </div> 
                                 </div>
                             </div>
                         </div>

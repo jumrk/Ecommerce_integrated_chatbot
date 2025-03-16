@@ -10,6 +10,14 @@ import OrderListPage from '../../page/admin/orderManagementPage/OrderListPage';
 import OrderDetailPage from '../../page/admin/orderManagementPage/OrderDetailPage';
 import OrderActivityLog from '../../component/admin/orderManagement/OrderActivityLog';
 import OrderHistoryPage from '../../page/admin/orderManagementPage/OrderHistoryPage';
+import CustomerListPage from '../../page/admin/customerManagementPage/CustomerListPage';
+import CustomerDetailPage from '../../page/admin/customerManagementPage/CustomerDetailPage';
+import CustomerChatPage from '../../page/admin/customerManagementPage/CustomerChatPage';
+import CustomerRolesPage from '../../page/admin/customerManagementPage/CustomerRolesPage';
+import MessageListPage from '../../page/admin/chatManagementPage/MessageListPage';
+import ChatbotPage from '../../page/admin/chatManagementPage/ChatbotPage';
+import VoucherListPage from '../../page/admin/voucherManagemenPage/VoucherListPage';
+import AddVoucherPage from '../../page/admin/voucherManagemenPage/AddVoucherPage';
 const AdminRoutes = () => {
     return (
         <Routes>
@@ -35,6 +43,26 @@ const AdminRoutes = () => {
                     <Route path="order-detail/:id" element={<OrderDetailPage />} />
                     <Route path="order-activity-log/:id" element={<OrderActivityLog />} />
                     <Route path="order-history" element={<OrderHistoryPage />} />
+                </Route>
+
+                {/* customer management */}
+                <Route path='customer' >
+                    <Route path='list-customer' element={<CustomerListPage />} />
+                    <Route path='detail-customer/:id' element={<CustomerDetailPage />} />
+                    <Route path='roles-customer' element={<CustomerRolesPage />} />
+                </Route>
+
+                {/* chat management */}
+                <Route path='messages' >
+                    <Route path='list-message' element={<MessageListPage />} />
+                    <Route path='chat/:id' element={<CustomerChatPage />} />
+                    <Route path='chatbot' element={<ChatbotPage />} />
+                </Route>
+
+                {/* voucher management */}
+                <Route path='vouchers' >
+                    <Route path='list-voucher' element={<VoucherListPage />} />
+                    <Route path='add-voucher' element={<AddVoucherPage />} />
                 </Route>
             </Route>
         </Routes>

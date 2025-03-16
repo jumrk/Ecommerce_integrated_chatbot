@@ -5,9 +5,10 @@ import {
     FaFolder, FaShoppingBag, FaSearch, FaTruck, FaUser, FaPhone, FaBan, FaTicketAlt,
     FaNewspaper, FaStar, FaComment, FaUserShield, FaCog, FaCreditCard, FaBoxOpen, FaEnvelope,
     FaQuestionCircle, FaKey, FaSignOutAlt, FaAngleLeft, FaAngleRight, FaBars,
-    FaHistory
+    FaHistory,
+    FaRobot
 } from 'react-icons/fa';
-import { IoArrowUndoOutline } from "react-icons/io5";
+import { IoArrowUndoOutline, IoChatbox, IoChatboxOutline } from "react-icons/io5";
 import './Sidebar.css';
 
 const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
@@ -162,19 +163,24 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
             title: 'Quản lý khách hàng',
             icon: <FaUser />,
             subItems: [
-                { title: 'Danh sách khách hàng', icon: <FaUser /> },
-                { title: 'Thông tin liên hệ', icon: <FaPhone /> },
-                { title: 'Chặn tài khoản', icon: <FaBan /> },
+                { title: 'Danh sách khách hàng', icon: <FaUser />, route: '/admin/customer/list-customer' },
+                { title: 'Phân quyền khách hàng', icon: <FaBan />, route: '/admin/customer/roles-customer' },
+            ],
+        },
+        {
+            title: 'Quản lý tin nhắn',
+            icon: <IoChatbox />,
+            subItems: [
+                { title: 'Hộp thư khách hàng', icon: <IoChatboxOutline />, route: '/admin/messages/list-message' },
+                { title: 'Hệ thống Chatbot', icon: <FaRobot />, route: '/admin/messages/chatbot' },
             ],
         },
         {
             title: 'Quản lý mã giảm giá',
             icon: <FaTicketAlt />,
             subItems: [
-                { title: 'Danh sách mã giảm giá', icon: <FaTicketAlt /> },
-                { title: 'Thêm mã giảm giá', icon: <FaPlus /> },
-                { title: 'Chỉnh sửa mã giảm giá', icon: <FaEdit /> },
-                { title: 'Xóa mã giảm giá', icon: <FaTrash /> },
+                { title: 'Danh sách mã giảm giá', icon: <FaTicketAlt />, route: '/admin/vouchers/list-voucher' },
+                { title: 'Thêm mã giảm giá', icon: <FaPlus />, route: '/admin/vouchers/add-voucher' },
             ],
         },
         {
