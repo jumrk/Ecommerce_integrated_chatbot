@@ -1,10 +1,46 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
+import { validateField } from '../../utils/validateFiled';
+import { ClipLoader } from 'react-spinners';
+import forgotPasswordAPI from '../../api/auth/forgotPasswordAPI';
 const ForgotPasswordPage = () => {
-    const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [formData, setFormData] = useState({
+        email: '',
+    });
+
+    const isFormValid =
+        formData.email !== "" &&
+        Object.values(errors).every(error => error === ""
+        );
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        setErrors({
+            ...errors,
+            [name]: validateField(name, value, formData),
+        });
+    }
+    const handleSubmit = async (e) => {
+        setIsLoading(true);
+        try {
+            const response = await forgotPasswordAPI(formData);
+            if (response.success) {
+                setIsSubmitted(true);
+            } else {
+                setErrors({ ...errors, email: response.message });
+            }
+        } catch (error) {
+            setErrors({ ...errors, email: error.message });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -57,12 +93,8 @@ const ForgotPasswordPage = () => {
                 </div>
 
                 {!isSubmitted ? (
-                    <motion.form
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="space-y-6"
-                    >
+                    <div className="space-y-2">
+
                         <motion.div
                             whileHover={{ scale: 1.01 }}
                             className="group"
@@ -72,20 +104,33 @@ const ForgotPasswordPage = () => {
                                 type="email"
                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
                                 placeholder="Nhập email của bạn"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                name="email"
+                                value={formData.email}
+                                onChange={(e) => handleChange(e)}
                             />
                         </motion.div>
-
+                        <motion.p
+                            className="text-red-500 text-sm mt-1 overflow-hidden"
+                            initial={{ opacity: 0, minHeight: 0, height: 0 }}
+                            animate={{ opacity: errors.email ? 1 : 0, minHeight: errors.email ? "20px" : 0, height: errors.email ? "auto" : 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                            {errors.email}
+                        </motion.p>
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => setIsSubmitted(true)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition duration-300"
+                            onClick={() => handleSubmit()}
+                            disabled={!isFormValid || isLoading}
+                            className={`w-full py-3 rounded-lg font-medium shadow-lg transition duration-300 
+                                ${isFormValid
+                                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-xl"
+                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
                         >
-                            Gửi yêu cầu khôi phục
+                            {isLoading ? <ClipLoader size={20} color='#fff' /> : "Gửi yêu cầu khôi phục"}
+
                         </motion.button>
-                    </motion.form>
+                    </div>
                 ) : (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

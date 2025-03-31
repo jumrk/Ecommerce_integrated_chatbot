@@ -7,7 +7,7 @@ const mockCategories = [
         id: 1,
         name: "Giày thể thao",
         description: "Các loại giày dành cho hoạt động thể thao",
-        icon: "https://example.com/icons/sports-shoes.png", // Thay bằng URL thật hoặc để trống
+        icon: "https://example.com/icons/sports-shoes.png",
         isActive: true,
         productCount: 25
     },
@@ -34,8 +34,73 @@ const mockCategories = [
         icon: "https://example.com/icons/sandals.png",
         isActive: true,
         productCount: 20
-    }
+    },
+    {
+        id: 5,
+        name: "Giày thể thao",
+        description: "Các loại giày dành cho hoạt động thể thao",
+        icon: "https://example.com/icons/sports-shoes.png",
+        isActive: true,
+        productCount: 25
+    },
+    {
+        id: 6,
+        name: "Giày công sở",
+        description: "Giày da sang trọng phù hợp môi trường công sở",
+        icon: "https://example.com/icons/formal-shoes.png",
+        isActive: true,
+        productCount: 15
+    },
+    {
+        id: 7,
+        name: "Giày casual",
+        description: "Giày thời trang phù hợp đi chơi, dạo phố",
+        icon: "https://example.com/icons/casual-shoes.png",
+        isActive: false,
+        productCount: 30
+    },
+    {
+        id: 8,
+        name: "Giày sandal",
+        description: "Các loại sandal và dép",
+        icon: "https://example.com/icons/sandals.png",
+        isActive: true,
+        productCount: 20
+    }, {
+        id: 9,
+        name: "Giày thể thao",
+        description: "Các loại giày dành cho hoạt động thể thao",
+        icon: "https://example.com/icons/sports-shoes.png",
+        isActive: true,
+        productCount: 25
+    },
+    {
+        id: 10,
+        name: "Giày công sở",
+        description: "Giày da sang trọng phù hợp môi trường công sở",
+        icon: "https://example.com/icons/formal-shoes.png",
+        isActive: true,
+        productCount: 15
+    },
+    {
+        id: 11,
+        name: "Giày casual",
+        description: "Giày thời trang phù hợp đi chơi, dạo phố",
+        icon: "https://example.com/icons/casual-shoes.png",
+        isActive: false,
+        productCount: 30
+    },
+    {
+        id: 12,
+        name: "Giày sandal",
+        description: "Các loại sandal và dép",
+        icon: "https://example.com/icons/sandals.png",
+        isActive: true,
+        productCount: 202
+    },
 ];
+
+
 
 export const useCategories = () => {
     const [categories, setCategories] = useState([]);

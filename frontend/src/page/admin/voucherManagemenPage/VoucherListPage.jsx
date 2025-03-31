@@ -4,7 +4,10 @@ import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 import EditVoucherModal from '../../../component/admin/voucherManagement/EditVoucherModal';
-
+import StatusCustom from '../../../component/condition/ConditionCustom';
+import Pagination from '../../../component/pagination/Pagination';
+import ButtonDelete from '../../../component/button/ButtonDelete';
+import ButtonEdit from '../../../component/button/ButtonEdit';
 const VoucherListPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -18,7 +21,11 @@ const VoucherListPage = () => {
     });
     const [selectedVoucher, setSelectedVoucher] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = vouchers.slice(indexOfFirstItem, indexOfLastItem);
     useEffect(() => {
         // Giả lập API call
         setTimeout(() => {
@@ -34,9 +41,150 @@ const VoucherListPage = () => {
                     endDate: "2024-08-31T23:59:59Z",
                     usageLimit: 100,
                     usageCount: 45,
-                    status: "active",
+                    status: "Hoạt động",
                     description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
                 },
+                {
+                    id: 2,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Hết hạn",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 3,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Chưa bắt đầu",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 4,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Chưa bắt đầu",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 5,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Hoạt động",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 6,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Hết hạn",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 7,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Chưa bắt đầu",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 8,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Chưa bắt đầu",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 9,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Hoạt động",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 10,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Hết hạn",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                },
+                {
+                    id: 11,
+                    code: "SUMMER2024",
+                    type: "percentage",
+                    value: 20,
+                    minSpend: 1000000,
+                    maxDiscount: 200000,
+                    startDate: "2024-06-01T00:00:00Z",
+                    endDate: "2024-08-31T23:59:59Z",
+                    usageLimit: 100,
+                    usageCount: 45,
+                    status: "Chưa bắt đầu",
+                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
+                }
+
                 // Thêm dữ liệu mẫu khác...
             ]);
             setLoading(false);
@@ -246,7 +394,7 @@ const VoucherListPage = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {vouchers.map((voucher) => (
+                                {currentItems.map((voucher) => (
                                     <tr key={voucher.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">
@@ -286,23 +434,27 @@ const VoucherListPage = () => {
                                             {voucher.usageCount}/{voucher.usageLimit}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(voucher.status)}`}>
-                                                {getStatusText(voucher.status)}
-                                            </span>
+                                            {voucher.status === "Hoạt động" ? <StatusCustom
+                                                type={"success"}
+                                                text={voucher.status}
+                                            /> : voucher.status === "Hết hạn" ? <StatusCustom
+                                                type={"danger"}
+                                                text={voucher.status}
+                                            /> : <StatusCustom
+                                                type={"warning"}
+                                                text={voucher.status}
+                                            />}
+
+
+
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button
+                                        <td className="flex justify-end gap-2 mt-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <ButtonEdit
                                                 onClick={() => handleEdit(voucher)}
-                                                className="text-blue-600 hover:text-blue-900 mr-4"
-                                            >
-                                                <FiEdit2 className="h-5 w-5" />
-                                            </button>
-                                            <button
+                                            />
+                                            <ButtonDelete
                                                 onClick={() => handleDelete(voucher.id)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                <FiTrash2 className="h-5 w-5" />
-                                            </button>
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -312,25 +464,12 @@ const VoucherListPage = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                        Hiển thị 1-10 trên tổng số {vouchers.length} mã giảm giá
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            Trước
-                        </button>
-                        <button className="px-3 py-1 bg-blue-600 text-white rounded-lg">
-                            1
-                        </button>
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            2
-                        </button>
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            Sau
-                        </button>
-                    </div>
-                </div>
+                <Pagination
+                    totalItems={vouchers.length}
+                    itemsPerPage={itemsPerPage}
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                />
             </div>
 
             {/* Add EditVoucherModal */}
@@ -339,7 +478,7 @@ const VoucherListPage = () => {
                 onClose={handleEditModalClose}
                 voucher={selectedVoucher}
             />
-        </div>
+        </div >
     );
 };
 

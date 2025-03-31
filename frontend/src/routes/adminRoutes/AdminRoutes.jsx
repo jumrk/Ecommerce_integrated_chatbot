@@ -18,6 +18,21 @@ import MessageListPage from '../../page/admin/chatManagementPage/MessageListPage
 import ChatbotPage from '../../page/admin/chatManagementPage/ChatbotPage';
 import VoucherListPage from '../../page/admin/voucherManagemenPage/VoucherListPage';
 import AddVoucherPage from '../../page/admin/voucherManagemenPage/AddVoucherPage';
+import BlogListPage from '../../page/admin/blogManagementPage/BlogListPage';
+import BlogDetailPage from '../../page/admin/blogManagementPage/BlogDetail';
+import AddBlogPage from '../../page/admin/blogManagementPage/AddBlogPage';
+import BlogCommentsPage from '../../page/admin/blogManagementPage/BlogCommentsPage';
+import BlogCategoryPage from '../../page/admin/blogManagementPage/BlogCategoryPage';
+import PaymentMethodDashboardPage from '../../page/admin/paymentMethodManagementPage/DashboardPage';
+import TransactionListPage from '../../page/admin/paymentMethodManagementPage/TransactionListPage';
+import RefundPage from '../../page/admin/paymentMethodManagementPage/RefundPage';
+import PaymentMethodConfigPage from '../../page/admin/paymentMethodManagementPage/PaymentMethodConfigPage';
+import ActivityLogPage from '../../page/admin/paymentMethodManagementPage/ActivityLogPage';
+import ShippingListPage from '../../page/admin/shippingManagementPage/ShippingListPage';
+import ShipperManagementPage from '../../page/admin/shippingManagementPage/ShipperManagementPage';
+import ShippingConfigPage from '../../page/admin/shippingManagementPage/ShippingConfigPage';
+import ShippingHistoryPage from '../../page/admin/shippingManagementPage/ShippingHistoryPage';
+
 const AdminRoutes = () => {
     return (
         <Routes>
@@ -64,6 +79,34 @@ const AdminRoutes = () => {
                     <Route path='list-voucher' element={<VoucherListPage />} />
                     <Route path='add-voucher' element={<AddVoucherPage />} />
                 </Route>
+
+                {/* blog management */}
+                <Route path='blogs' >
+                    <Route path='list-blog' element={<BlogListPage />} />
+                    <Route path='blog-detail/:id' element={<BlogDetailPage />} />
+                    <Route path='add-blog' element={<AddBlogPage />} />
+                    <Route path='comments' element={<BlogCommentsPage />} />
+                    <Route path='categories' element={<BlogCategoryPage />} />
+                </Route>
+
+                {/* payment method management */}
+                <Route path='payment' >
+                    <Route path='dashboard' element={<PaymentMethodDashboardPage />} />
+                    <Route path='transaction-list' element={<TransactionListPage />} />
+                    <Route path='refund' element={<RefundPage />} />
+                    <Route path='config' element={<PaymentMethodConfigPage />} />
+                    <Route path='activity-log' element={<ActivityLogPage />} />
+                </Route>
+
+                {/* shipping management */}
+                <Route path='shipping' >
+                    <Route path='list-shipping' element={<ShippingListPage />} />
+                    <Route path='shipper-management' element={<ShipperManagementPage />} />
+                    <Route path='shipping-config' element={<ShippingConfigPage />} />
+                    <Route path='shipping-history' element={<ShippingHistoryPage />} />
+                </Route>
+
+
             </Route>
         </Routes>
     )

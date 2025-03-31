@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-    FaTachometerAlt, FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaEdit, FaTrash,
-    FaFolder, FaShoppingBag, FaSearch, FaTruck, FaUser, FaPhone, FaBan, FaTicketAlt,
-    FaNewspaper, FaStar, FaComment, FaUserShield, FaCog, FaCreditCard, FaBoxOpen, FaEnvelope,
-    FaQuestionCircle, FaKey, FaSignOutAlt, FaAngleLeft, FaAngleRight, FaBars,
+    FaTachometerAlt, FaBox, FaPlus,
+    FaFolder, FaShoppingBag, FaUser, FaBan, FaTicketAlt,
+    FaNewspaper, FaStar, FaComment, FaCog, FaCreditCard, FaBoxOpen, FaKey, FaSignOutAlt,
     FaHistory,
-    FaRobot
+    FaRobot, FaClipboardList
 } from 'react-icons/fa';
+import { TbCreditCardRefund } from "react-icons/tb";
 import { IoArrowUndoOutline, IoChatbox, IoChatboxOutline } from "react-icons/io5";
 import './Sidebar.css';
 
@@ -187,45 +187,31 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
             title: 'Quản lý blog & tin tức',
             icon: <FaNewspaper />,
             subItems: [
-                { title: 'Danh sách bài viết', icon: <FaNewspaper /> },
-                { title: 'Thêm bài viết mới', icon: <FaPlus /> },
-                { title: 'Chỉnh sửa bài viết', icon: <FaEdit /> },
-                { title: 'Xóa bài viết', icon: <FaTrash /> },
+                { title: 'Danh sách bài viết', icon: <FaNewspaper />, route: '/admin/blogs/list-blog' },
+                { title: 'Thêm bài viết mới', icon: <FaPlus />, route: '/admin/blogs/add-blog' },
+                { title: 'Bình luận bài viết', icon: <FaComment />, route: '/admin/blogs/comments' },
+                { title: 'Danh mục bài viết', icon: <FaFolder />, route: '/admin/blogs/categories' },
             ],
         },
         {
-            title: 'Quản lý phản hồi & đánh giá',
-            icon: <FaStar />,
+            title: 'Quản lý phương thức thanh toán',
+            icon: <FaCreditCard />,
             subItems: [
-                { title: 'Đánh giá sản phẩm', icon: <FaStar /> },
-                { title: 'Bình luận của khách hàng', icon: <FaComment /> },
-                { title: 'Xóa phản hồi vi phạm', icon: <FaTrash /> },
+                { title: 'Tổng quan', icon: <FaTachometerAlt />, route: '/admin/payment/dashboard' },
+                { title: 'Danh sách giao dịch', icon: <FaClipboardList />, route: '/admin/payment/transaction-list' },
+                { title: 'Hoàn tiền', icon: <TbCreditCardRefund />, route: '/admin/payment/refund' },
+                { title: 'Cấu hình phương thức thanh toán', icon: <FaCog />, route: '/admin/payment/config' },
+                { title: 'Nhật kí hoạt động', icon: <FaHistory />, route: '/admin/payment/activity-log' },
             ],
         },
         {
-            title: 'Quản lý nhân viên',
-            icon: <FaUserShield />,
+            title: 'Quản lý vận chuyển',
+            icon: <FaBoxOpen />,
             subItems: [
-                { title: 'Danh sách nhân viên', icon: <FaUserShield /> },
-                { title: 'Thêm nhân viên mới', icon: <FaPlus /> },
-                { title: 'Phân quyền', icon: <FaCog /> },
-            ],
-        },
-        {
-            title: 'Cài đặt hệ thống',
-            icon: <FaCog />,
-            subItems: [
-                { title: 'Cấu hình website', icon: <FaCog /> },
-                { title: 'Cài đặt thanh toán', icon: <FaCreditCard /> },
-                { title: 'Cài đặt vận chuyển', icon: <FaBoxOpen /> },
-            ],
-        },
-        {
-            title: 'Hỗ trợ & Liên hệ',
-            icon: <FaEnvelope />,
-            subItems: [
-                { title: 'Tin nhắn từ khách hàng', icon: <FaEnvelope /> },
-                { title: 'Câu hỏi thường gặp', icon: <FaQuestionCircle /> },
+                { title: 'Danh sách vận chuyển', icon: <FaClipboardList />, route: '/admin/shipping/list-shipping' },
+                { title: 'Quản lý shipper', icon: <FaUser />, route: '/admin/shipping/shipper-management' },
+                { title: 'Cấu hình vận chuyển', icon: <FaCog />, route: '/admin/shipping/shipping-config' },
+                { title: 'Lịch sử vận chuyển', icon: <FaHistory />, route: '/admin/shipping/shipping-history' },
             ],
         },
         {
@@ -265,7 +251,7 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
                 <div className="space-y-8">
                     <div>
                         <div className="text-gray-400 text-xs font-semibold mb-4 px-3">
-                            MAIN HOME
+                            TRANG CHỦ
                         </div>
                         <div className="space-y-1">
                             {navItems.slice(0, 1).map((item, index) => renderMenuItem(item, index))}
@@ -274,20 +260,11 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
 
                     <div>
                         <div className="text-gray-400 text-xs font-semibold mb-4 px-3">
-                            ALL PAGE
-                        </div>
+                            QUẢN LÝ
+                                    </div>
                         <div className="space-y-1">
-                            {navItems.slice(1, 9).map((item, index) => renderMenuItem(item, index, 1))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="text-gray-400 text-xs font-semibold mb-4 px-3">
-                            SETTING
-                        </div>
-                        <div className="space-y-1">
-                            {navItems.slice(9).map((item, index) => renderMenuItem(item, index, 9))}
-                        </div>
+                            {navItems.slice(1, 11).map((item, index) => renderMenuItem(item, index, 1))}
+                            </div>
                     </div>
                 </div>
             </nav>

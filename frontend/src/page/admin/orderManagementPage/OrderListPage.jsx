@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiEye } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
-
+import StatusBadge from '../../../component/condition/ConditionCustom';
+import ButtonViewMore from '../../../component/button/ButtonViewMore';
+import Pagination from '../../../component/pagination/Pagination';
 const OrderListPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [filterOpen, setFilterOpen] = useState(false);
-    const [selectedOrders, setSelectedOrders] = useState([]);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
     // Giả lập loading
     React.useEffect(() => {
         setTimeout(() => {
@@ -47,39 +49,92 @@ const OrderListPage = () => {
             paymentMethod: "Momo",
             orderDate: "2024-03-14T15:20:00Z",
             items: 4
-        }
+        },
+        {
+            id: "DH004",
+            customerName: "Nguyễn Thị D",
+            phone: "0912345678",
+            totalAmount: 3200000,
+            status: "cancelled",
+            paymentMethod: "Banking",
+            orderDate: "2024-03-13T10:45:00Z",
+            items: 1
+        },
+        {
+            id: "DH005",
+            customerName: "Trần Văn E",
+            phone: "0987654321",
+            totalAmount: 4500000,
+            status: "processing",
+            paymentMethod: "Momo",
+            orderDate: "2024-03-12T14:30:00Z",
+            items: 2
+        },
+        {
+            id: "DH006",
+            customerName: "Lê Thị F",
+            phone: "0369852147",
+            totalAmount: 2800000,
+            status: "completed",
+            paymentMethod: "Banking",
+            orderDate: "2024-03-11T16:15:00Z",
+            items: 1
+        },
+        {
+            id: "DH007",
+            customerName: "Nguyễn Văn G",
+            phone: "0987654321",
+            totalAmount: 3800000,
+            status: "processing",
+            paymentMethod: "Momo",
+            orderDate: "2024-03-10T12:00:00Z",
+            items: 3
+        },
+        {
+            id: "DH008",
+            customerName: "Trần Thị H",
+            phone: "0912345678",
+            totalAmount: 2500000,
+            status: "cancelled",
+            paymentMethod: "Banking",
+            orderDate: "2024-03-09T18:30:00Z",
+            items: 1
+        },
+        {
+            id: "DH009",
+            customerName: "Lê Văn I",
+            phone: "0369852147",
+            totalAmount: 4200000,
+            status: "processing",
+            paymentMethod: "Momo",
+            orderDate: "2024-03-08T11:00:00Z",
+            items: 2
+        },
+        {
+            id: "DH010",
+            customerName: "Nguyễn Thị K",
+            phone: "0912345678",
+            totalAmount: 3500000,
+            status: "completed",
+            paymentMethod: "Banking",
+            orderDate: "2024-03-07T13:45:00Z",
+            items: 1
+        },
+        {
+            id: "DH011",
+            customerName: "Trần Văn L",
+            phone: "0987654321",
+            totalAmount: 4800000,
+            status: "processing",
+            paymentMethod: "Momo",
+            orderDate: "2024-03-06T15:30:00Z",
+            items: 2
+        },
+
     ];
-
-    const getStatusBadgeClass = (status) => {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'processing':
-                return 'bg-blue-100 text-blue-800';
-            case 'completed':
-                return 'bg-green-100 text-green-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'pending':
-                return 'Chờ xác nhận';
-            case 'processing':
-                return 'Đang xử lý';
-            case 'completed':
-                return 'Hoàn thành';
-            case 'cancelled':
-                return 'Đã hủy';
-            default:
-                return status;
-        }
-    };
-
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
@@ -207,7 +262,7 @@ const OrderListPage = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {orders.map((order) => (
+                            {currentOrders.map((order) => (
                                 <tr key={order.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="font-medium text-blue-600">#{order.id}</span>
@@ -231,9 +286,10 @@ const OrderListPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
-                                            {getStatusText(order.status)}
-                                        </span>
+                                        {order.status == 'pending' ? <StatusBadge type="warning" text={order.status} /> :
+                                            order.status == 'processing' ? <StatusBadge type="info" text={order.status} /> :
+                                                order.status == 'completed' ? <StatusBadge type="success" text={order.status} /> :
+                                                    <StatusBadge type="danger" text={order.status} />}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                                         {order.paymentMethod}
@@ -242,13 +298,10 @@ const OrderListPage = () => {
                                         {formatDate(order.orderDate)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
+                                        <ButtonViewMore
                                             onClick={() => navigate(`/admin/orders/order-detail/${order.id}`)}
-                                            className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                                        >
-                                            <FiEye className="w-4 h-4" />
-                                            Chi tiết
-                                        </button>
+                                            text="Chi tiết"
+                                        />
                                     </td>
                                 </tr>
                             ))}
@@ -257,27 +310,12 @@ const OrderListPage = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                    <div className="flex justify-between items-center">
-                        <div className="text-sm text-gray-700">
-                            Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">10</span> trong số <span className="font-medium">20</span> đơn hàng
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                Trước
-                            </button>
-                            <button className="px-3 py-1 border rounded bg-blue-600 text-white">
-                                1
-                            </button>
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                2
-                            </button>
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                Sau
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={orders.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                />
             </div>
         </div>
     );

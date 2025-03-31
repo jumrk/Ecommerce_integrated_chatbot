@@ -2,12 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiFilter, FiMail, FiPhone, FiUser, FiShoppingBag } from 'react-icons/fi';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
-
+import Pagination from '../../../component/pagination/Pagination';
+import ButtonDelete from '../../../component/button/ButtonDelete';
+import ConditionCustom from '../../../component/condition/ConditionCustom';
 const CustomerListPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [customers, setCustomers] = useState([]);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentCustomers = customers.slice(indexOfFirstItem, indexOfLastItem);
 
     useEffect(() => {
         // Giả lập API call
@@ -24,6 +31,128 @@ const CustomerListPage = () => {
                     status: "active",
                     joinDate: "2024-01-01T00:00:00Z"
                 },
+                {
+                    id: 2,
+                    name: "Nguyễn Văn B",
+                    email: "nguyenvanb@example.com",
+                    phone: "0987654321",
+                    totalOrders: 10,
+                    totalSpent: 25000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 3,
+                    name: "Nguyễn Văn C",
+                    email: "nguyenvanc@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 4,
+                    name: "Nguyễn Văn D",
+                    email: "nguyenvand@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 5,
+                    name: "Nguyễn Văn E",
+                    email: "nguyenvane@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 6,
+                    name: "Nguyễn Văn F",
+                    email: "nguyenvanf@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+
+                {
+                    id: 7,
+                    name: "Nguyễn Văn G",
+                    email: "nguyenvang@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 8,
+                    name: "Nguyễn Văn H",
+                    email: "nguyenvanh@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 9,
+                    name: "Nguyễn Văn I",
+                    email: "nguyenvania@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 10,
+                    name: "Nguyễn Văn J",
+                    email: "nguyenvanj@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 11,
+                    name: "Nguyễn Văn K",
+                    email: "nguyenvank@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 12,
+                    name: "Nguyễn Văn L",
+                    email: "nguyenvanl@example.com",
+                    phone: "0123456789",
+                    totalOrders: 5,
+                    totalSpent: 15000000,
+                    lastOrder: "2024-03-15T08:00:00Z",
+                    status: "active",
+                    joinDate: "2024-01-01T00:00:00Z"
+                }
                 // Thêm dữ liệu mẫu khác...
             ]);
             setLoading(false);
@@ -139,7 +268,7 @@ const CustomerListPage = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {customers.map((customer) => (
+                                {currentCustomers.map((customer) => (
                                     <tr
                                         key={customer.id}
                                         className="hover:bg-gray-50 cursor-pointer"
@@ -187,29 +316,13 @@ const CustomerListPage = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${customer.status === 'active'
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {customer.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
-                                            </span>
+                                            <ConditionCustom type={customer.status === 'active' ? 'success' : 'danger'} text={customer.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'} />
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigate(`/admin/customer/detail-customer/${customer.id}`);
-                                                }}
-                                                className="text-blue-600 hover:text-blue-900 mr-4"
-                                            >
-                                                Chi tiết
-                                            </button>
-                                            <button
+                                        <td className=" py-4 px-9 gap-2 whitespace-nowrap text-right text-sm font-medium">
+                                            <ButtonDelete
                                                 onClick={(e) => handleDeleteAccount(e, customer.id)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                Xóa
-                                            </button>
+                                                text="Xóa"
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -219,30 +332,14 @@ const CustomerListPage = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                        Hiển thị 1-10 trên tổng số {customers.length} khách hàng
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            Trước
-                        </button>
-                        <button className="px-3 py-1 bg-blue-600 text-white rounded-lg">
-                            1
-                        </button>
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            2
-                        </button>
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            3
-                        </button>
-                        <button className="px-3 py-1 border rounded-lg hover:bg-gray-50">
-                            Sau
-                        </button>
-                    </div>
-                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={customers.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                />
             </div>
-        </div>
+        </div >
     );
 };
 

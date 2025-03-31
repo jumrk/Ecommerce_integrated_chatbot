@@ -94,7 +94,7 @@ const UserPage = () => {
                         <NavItem to="/user/info" icon={FiUser}>Thông tin cá nhân</NavItem>
                         <NavItem to="/user/orders" icon={FiShoppingBag}>Đơn hàng của tôi</NavItem>
                         <NavItem to="/user/addresses" icon={FiMapPin}>Sổ địa chỉ</NavItem>
-                        <NavItem icon={FiLogOut}>Đăng xuất</NavItem>
+                        <NavItem to="/logout-success" icon={FiLogOut}>Đăng xuất</NavItem>
                     </div>
 
                     <div className="mt-4 pt-4 border-t space-y-1">
@@ -168,7 +168,7 @@ const UserPage = () => {
                                 </SlideInWhenVisible>
 
                                 <SlideInWhenVisible direction="down" delay={0.4}  >
-                                    <NavItem to="/" icon={FiLogOut}>Đăng xuất</NavItem>
+                                    <NavItem to="/logout-success" icon={FiLogOut}>Đăng xuất</NavItem>
                                 </SlideInWhenVisible>
                             </nav>
                         </div>

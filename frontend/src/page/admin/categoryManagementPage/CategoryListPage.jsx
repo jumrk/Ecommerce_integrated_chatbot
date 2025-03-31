@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import { useCategories } from '../../../hooks/admin/categoryHook/useCategories';
 import ConfirmDialog from '../../../component/common/ConfirmDialog';
 import EditCategoryModal from '../../../component/admin/CategoryManagement/EditCategoryModal';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
-
+import ButtonEdit from '../../../component/button/ButtonEdit';
+import ButtonDelete from '../../../component/button/ButtonDelete';
+import Pagination from '../../../component/pagination/Pagination';
+import StatusBadge from '../../../component/condition/ConditionCustom';
 const CategoryListPage = () => {
     const {
         categories,
@@ -15,9 +16,21 @@ const CategoryListPage = () => {
         handleUpdateCategory
     } = useCategories();
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo(0, 0);
+    };
 
     const handleEdit = (category) => {
         setSelectedCategory(category);
@@ -69,7 +82,7 @@ const CategoryListPage = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {categories.map((category) => (
+                            {currentCategories.map((category) => (
                                 <tr key={category.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
@@ -96,35 +109,33 @@ const CategoryListPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                            {category.isActive ? 'Hoạt động' : 'Ẩn'}
-                                        </span>
+                                        {category.isActive ? <StatusBadge type="success" text="Hoạt động" /> :
+                                            <StatusBadge type="danger" text="Ẩn" />}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex items-center justify-end gap-3">
-                                            <button
+                                            <ButtonEdit
                                                 onClick={() => handleEdit(category)}
-                                                className="text-blue-600 hover:text-blue-900"
-                                            >
-                                                <FaEdit size={18} />
-                                            </button>
-                                            <button
+                                            />
+                                            <ButtonDelete
                                                 onClick={() => handleDelete(category)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                <FaTrash size={18} />
-                                            </button>
+                                            />
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+
+                    <Pagination
+                        currentPage={currentPage}
+                        totalItems={categories.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                    />
                 </div>
             </div>
 
-            {/* Edit Modal */}
             <EditCategoryModal
                 isOpen={showEditModal}
                 category={selectedCategory}
@@ -135,7 +146,6 @@ const CategoryListPage = () => {
                 onUpdate={handleUpdateCategory}
             />
 
-            {/* Confirm Delete Dialog */}
             <ConfirmDialog
                 isOpen={showConfirmDelete}
                 title="Xác nhận xóa"

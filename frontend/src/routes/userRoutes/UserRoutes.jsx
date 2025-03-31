@@ -20,7 +20,7 @@ import LoginPage from '../../page/authPage/LoginPage';
 import RegisterPage from '../../page/authPage/RegisterPage';
 import ForgotPasswordPage from '../../page/authPage/ForgotPassPage';
 import CheckoutPage from '../../page/user/checkoutPage/CheckoutPage';
-
+import { AuthSuccess, LogoutSuccess } from '../../utils/AuthSuccess';
 const UserRoutes = () => {
     return (
         <Routes>
@@ -45,9 +45,12 @@ const UserRoutes = () => {
                 </Route>
                 <Route path="/checkout" element={<CheckoutPage />} />
             </Route>
+            {/* Authentication Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path='/auth-success' element={<AuthSuccess />} />
+            <Route path='/logout-success' element={<LogoutSuccess />} />
         </Routes>
     );
 };

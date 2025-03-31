@@ -1,67 +1,59 @@
-import React, { useState } from 'react';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import React, { useEffect, useState, useMemo } from 'react';
+import { FiSearch, FiFilter } from 'react-icons/fi';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
 import './productManagement.css';
+import StatusBadge from '../../../component/condition/ConditionCustom';
+import { getProducts } from '../../../api/productService';
+import ButtonEdit from '../../../component/button/ButtonEdit';
+import ButtonDelete from '../../../component/button/ButtonDelete';
+import Pagination from '../../../component/pagination/Pagination';
+import { Search } from '../../../utils/search/search';
 
 const ProductListPage = () => {
-    const [selectedProducts, setSelectedProducts] = useState([]);
     const [filterOpen, setFilterOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [originalProducts, setOriginalProducts] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const itemsPerPage = 10;
 
-    React.useEffect(() => {
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+    useEffect(() => {
+        const fetchProducts = async () => {
+            setLoading(true);
+            try {
+                const fetchedProducts = await getProducts();
+                setOriginalProducts(fetchedProducts);
+                setProducts(fetchedProducts);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
     }, []);
 
-    const products = [
-        {
-            id: 1,
-            image: "https://via.placeholder.com/50",
-            name: "Nike Air Max 270",
-            category: "Giày",
-            price: 2990000,
-            stock: 89,
-            status: "Còn hàng",
-            sales: 250
-        },
-        {
-            id: 2,
-            image: "https://via.placeholder.com/50",
-            name: "Adidas Ultraboost",
-            category: "Giày",
-            price: 3500000,
-            stock: 45,
-            status: "Còn hàng",
-            sales: 180
-        },
-        {
-            id: 3,
-            image: "https://via.placeholder.com/50",
-            name: "T-shirt Cotton",
-            category: "Quần áo",
-            price: 250000,
-            stock: 10,
-            status: "Sắp hết",
-            sales: 300
-        },
-    ];
+    // Lọc sản phẩm khi searchTerm thay đổi
+    useEffect(() => {
+        const filteredProducts = Search(originalProducts, searchTerm);
+        setProducts(filteredProducts);
+        setCurrentPage(1);
+    }, [searchTerm, originalProducts]);
 
-    const handleSelectAll = (e) => {
-        if (e.target.checked) {
-            setSelectedProducts(products.map(p => p.id));
-        } else {
-            setSelectedProducts([]);
-        }
+    // Tính toán sản phẩm cho trang hiện tại
+    const currentProducts = useMemo(() => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        return products.slice(indexOfFirstItem, indexOfLastItem);
+    }, [products, currentPage]);
+
+
+    const getTotalStock = (stock) => {
+        return Object.values(stock).reduce((total, current) => total + current, 0);
     };
 
-    const handleSelectProduct = (productId) => {
-        setSelectedProducts(prev =>
-            prev.includes(productId)
-                ? prev.filter(id => id !== productId)
-                : [...prev, productId]
-        );
-    };
+
 
     const handleEdit = (id) => {
         console.log(`Editing product with id: ${id}`);
@@ -76,6 +68,15 @@ const ProductListPage = () => {
             style: 'currency',
             currency: 'VND'
         }).format(price);
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo(0, 0);
+    };
+
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
     };
 
     if (loading) {
@@ -102,6 +103,8 @@ const ProductListPage = () => {
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm sản phẩm..."
+                                value={searchTerm}
+                                onChange={handleSearch}
                                 className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                             />
                             <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xl" />
@@ -113,13 +116,6 @@ const ProductListPage = () => {
                             <FiFilter className="text-gray-700 text-xl" />
                         </button>
                     </div>
-
-                    <select className="w-full lg:w-auto border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600 shadow-sm">
-                        <option>Mới nhất</option>
-                        <option>Cũ nhất</option>
-                        <option>Giá: Thấp đến cao</option>
-                        <option>Giá: Cao đến thấp</option>
-                    </select>
                 </div>
 
                 {/* Filter Panel */}
@@ -168,14 +164,6 @@ const ProductListPage = () => {
                     <table className="w-full min-w-[900px]">
                         <thead>
                             <tr className="bg-gray-100 text-gray-700">
-                                <th className="sticky left-0 bg-gray-100 py-4 px-6 text-left font-semibold">
-                                    <input
-                                        type="checkbox"
-                                        onChange={handleSelectAll}
-                                        checked={selectedProducts.length === products.length}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    />
-                                </th>
                                 <th className="py-4 px-6 text-left font-semibold">Sản phẩm</th>
                                 <th className="py-4 px-6 text-left font-semibold">Danh mục</th>
                                 <th className="py-4 px-6 text-left font-semibold">Giá</th>
@@ -186,20 +174,12 @@ const ProductListPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {products.map((product) => (
-                                <tr key={product.id} className="hover:bg-gray-50 transition-all duration-200">
-                                    <td className="sticky left-0 bg-white py-4 px-6">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedProducts.includes(product.id)}
-                                            onChange={() => handleSelectProduct(product.id)}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        />
-                                    </td>
+                            {currentProducts.map((product) => (
+                                <tr key={product._id} className="hover:bg-gray-50 transition-all duration-200">
                                     <td className="py-4 px-6 min-w-[250px]">
                                         <div className="flex items-center space-x-4">
                                             <img
-                                                src={product.image}
+                                                src={product.images[0]}
                                                 alt={product.name}
                                                 className="w-14 h-14 rounded-lg object-cover border border-gray-200 shadow-sm"
                                             />
@@ -208,30 +188,21 @@ const ProductListPage = () => {
                                     </td>
                                     <td className="py-4 px-6 text-gray-600">{product.category}</td>
                                     <td className="py-4 px-6 text-gray-900 font-semibold">{formatPrice(product.price)}</td>
-                                    <td className="py-4 px-6 text-gray-600">{product.stock}</td>
+                                    <td className="py-4 px-6 text-gray-600">{getTotalStock(product.stock)}</td>
                                     <td className="py-4 px-6">
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                            ${product.status === 'Còn hàng' ? 'bg-green-100 text-green-800' :
-                                                product.status === 'Sắp hết' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'}`}>
-                                            {product.status}
-                                        </span>
+                                        {product.status === 'Còn hàng' ? (
+                                            <StatusBadge type="success" text="Còn hàng" />
+                                        ) : product.status === 'Sắp hết' ? (
+                                            <StatusBadge type="warning" text="Sắp hết" />
+                                        ) : (
+                                            <StatusBadge type="danger" text={product.status} />
+                                        )}
                                     </td>
-                                    <td className="py-4 px-6 text-gray-600">{product.sales}</td>
+                                    <td className="py-4 px-6 text-gray-600">{product.sold || 0}</td>
                                     <td className="py-4 px-6">
                                         <div className="flex items-center space-x-4">
-                                            <button
-                                                onClick={() => handleEdit(product.id)}
-                                                className="p-2 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition-colors"
-                                            >
-                                                <FiEdit2 className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(product.id)}
-                                                className="p-2 bg-red-100 rounded-full text-red-600 hover:bg-red-200 transition-colors"
-                                            >
-                                                <FiTrash2 className="w-5 h-5" />
-                                            </button>
+                                            <ButtonEdit onClick={() => handleEdit(product._id)} />
+                                            <ButtonDelete onClick={() => handleDelete(product._id)} />
                                         </div>
                                     </td>
                                 </tr>
@@ -241,29 +212,15 @@ const ProductListPage = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t bg-gray-50">
-                    <span className="text-sm text-gray-600 mb-4 md:mb-0">
-                        Hiển thị <span className="font-semibold">1</span> đến <span className="font-semibold">{products.length}</span> trong số{' '}
-                        <span className="font-semibold">{products.length}</span> kết quả
-                    </span>
-                    <div className="flex items-center space-x-2">
-                        <button className="px-4 py-2 border rounded-xl text-gray-600 hover:bg-gray-100 transition-colors">
-                            Trước
-                        </button>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">
-                            1
-                        </button>
-                        <button className="px-4 py-2 border rounded-xl text-gray-600 hover:bg-gray-100 transition-colors">
-                            2
-                        </button>
-                        <button className="px-4 py-2 border rounded-xl text-gray-600 hover:bg-gray-100 transition-colors">
-                            Sau
-                        </button>
-                    </div>
-                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={products.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );
 };
 
-export default ProductListPage; 
+export default ProductListPage;

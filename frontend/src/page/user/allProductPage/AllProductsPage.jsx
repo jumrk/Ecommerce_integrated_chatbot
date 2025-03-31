@@ -68,17 +68,22 @@ const AllProductsPage = () => {
                 <ProductFilterSidebar onFilterChange={handleFilterChange} initialCategory={filters.category} />
             </div>
 
-            {!filters.mobileOpen && (
-                <button
-                    className="md:hidden fixed top-20 left-4 z-30 bg-gray-800 text-white p-2 
+            <div>
+                {!filters.mobileOpen && (
+                    <button
+                        className="md:hidden fixed top-20 left-4 z-30 bg-gray-800 text-white p-2 
                     rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300"
-                    onClick={toggleMobileMenu}
-                >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            )}
+                        onClick={toggleMobileMenu}
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                )}
+                {filters.mobileOpen && (
+                    <div className="fixed inset-0 z-10 bg-black bg-opacity-50" onClick={toggleMobileMenu} />
+                )}
+            </div>
             <div
                 className={`fixed inset-y-16 z-20 left-0 w-64 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${filters.mobileOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}

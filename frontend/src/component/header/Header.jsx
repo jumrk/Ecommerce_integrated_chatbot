@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaShoppingCart, FaUser, FaBell, FaBars, FaTimes, FaChevronDown } from 'react-icons/fa';
 import { NavLink } from "react-router-dom";
+import { getToken } from '../../utils/storage';
 const Header = () => {
+  const token = getToken();
   const [state, setState] = useState({
     mobileMenu: false,
     searchOpen: false,
   });
   const [cartItemCount] = useState(5);
-  const [isAuthenticated] = useState(true);
+  const [isAuthenticated] = useState(token);
 
   useEffect(() => {
     if (state.mobileMenu) {
@@ -117,30 +119,40 @@ const Header = () => {
               </button>
               <div className="relative group">
                 <div className="cursor-pointer">
-                  <NavLink to="/user">
-                    <FaUser
-                      size={20}
-                      className="text-gray-700 transition-all duration-300 ease-in-out hover:scale-110"
-                    />
-                  </NavLink>
+                  <FaUser
+                    size={20}
+                    className="text-gray-700 transition-all duration-300 ease-in-out hover:scale-110"
+                  />
+                </div>
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+                  {!isAuthenticated ? (
+                    <div>
+                      <NavLink
+                        to="/login"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-300"
+                      >
+                        Đăng nhập
+                      </NavLink>
+                      <NavLink
+                        to="/register"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-300"
+                      >
+                        Đăng ký
+                      </NavLink>
+                    </div>
+                  ) : (
+                    <div>
+                      <NavLink
+                        to="/user"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-300"
+                      >
+                        Thông tin
+                      </NavLink>
+                    </div>
+                  )}
+
                 </div>
 
-                {!isAuthenticated && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
-                    <NavLink
-                      to="/login"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-300"
-                    >
-                      Đăng nhập
-                    </NavLink>
-                    <NavLink
-                      to="/register"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-300"
-                    >
-                      Đăng ký
-                    </NavLink>
-                  </div>
-                )}
               </div>
             </div>
           </nav>

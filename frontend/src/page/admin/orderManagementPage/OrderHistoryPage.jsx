@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiEye } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../../component/common/LoadingSpinner';
-
+import StatusBadge from '../../../component/condition/ConditionCustom';
+import ButtonViewMore from '../../../component/button/ButtonViewMore';
+import Pagination from '../../../component/pagination/Pagination';
 const OrderHistoryPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [filterOpen, setFilterOpen] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
     // Giả lập loading
     React.useEffect(() => {
         setTimeout(() => {
@@ -22,8 +25,8 @@ const OrderHistoryPage = () => {
             customerName: "Nguyễn Văn A",
             phone: "0123456789",
             totalAmount: 2990000,
-            status: "completed", // đã giao
-            paymentStatus: "paid",
+            status: "Đã giao", // đã giao
+            paymentStatus: "Đã thanh toán",
             completedDate: "2024-03-10T08:00:00Z",
             items: 3
         },
@@ -32,8 +35,8 @@ const OrderHistoryPage = () => {
             customerName: "Trần Thị B",
             phone: "0987654321",
             totalAmount: 1500000,
-            status: "cancelled", // đã hủy
-            paymentStatus: "refunded",
+            status: "Đã hủy", // đã hủy
+            paymentStatus: "Đã hoàn tiền",
             completedDate: "2024-03-12T09:30:00Z",
             items: 2,
             cancelReason: "Khách hàng yêu cầu hủy"
@@ -43,56 +46,105 @@ const OrderHistoryPage = () => {
             customerName: "Lê Văn C",
             phone: "0369852147",
             totalAmount: 5600000,
-            status: "completed",
-            paymentStatus: "paid",
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
             completedDate: "2024-03-14T15:20:00Z",
             items: 4
-        }
+        },
+        {
+            id: "DH004",
+            customerName: "Trần Thị B",
+            phone: "0987654321",
+            totalAmount: 1500000,
+            status: "Đã hủy", // đã hủy
+            paymentStatus: "Đã hoàn tiền",
+            completedDate: "2024-03-12T09:30:00Z",
+            items: 2,
+            cancelReason: "Khách hàng yêu cầu hủy"
+        },
+        {
+            id: "DH005",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
+        {
+            id: "DH006",
+            customerName: "Trần Thị B",
+            phone: "0987654321",
+            totalAmount: 1500000,
+            status: "Đã hủy", // đã hủy
+            paymentStatus: "Đã hoàn tiền",
+            completedDate: "2024-03-12T09:30:00Z",
+            items: 2,
+            cancelReason: "Khách hàng yêu cầu hủy"
+        },
+        {
+            id: "DH007",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
+        {
+            id: "DH008",
+            customerName: "Trần Thị B",
+            phone: "0987654321",
+            totalAmount: 1500000,
+            status: "Đã hủy", // đã hủy
+            paymentStatus: "Đã hoàn tiền",
+            completedDate: "2024-03-12T09:30:00Z",
+            items: 2,
+            cancelReason: "Khách hàng yêu cầu hủy"
+        },
+        {
+            id: "DH009",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
+        {
+            id: "DH010",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
+        {
+            id: "DH011",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
+        {
+            id: "DH012",
+            customerName: "Lê Văn C",
+            phone: "0369852147",
+            totalAmount: 5600000,
+            status: "Đã giao",
+            paymentStatus: "Đã thanh toán",
+            completedDate: "2024-03-14T15:20:00Z",
+            items: 4
+        },
     ];
-
-    const getStatusBadgeClass = (status) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-green-100 text-green-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'completed':
-                return 'Đã giao';
-            case 'cancelled':
-                return 'Đã hủy';
-            default:
-                return status;
-        }
-    };
-
-    const getPaymentStatusBadgeClass = (status) => {
-        switch (status) {
-            case 'paid':
-                return 'bg-blue-100 text-blue-800';
-            case 'refunded':
-                return 'bg-orange-100 text-orange-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const getPaymentStatusText = (status) => {
-        switch (status) {
-            case 'paid':
-                return 'Đã thanh toán';
-            case 'refunded':
-                return 'Đã hoàn tiền';
-            default:
-                return status;
-        }
-    };
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -111,6 +163,9 @@ const OrderHistoryPage = () => {
         }).format(new Date(dateString));
     };
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentOrders = completedOrders.slice(indexOfFirstItem, indexOfLastItem);
     if (loading) return <LoadingSpinner />;
 
     return (
@@ -220,7 +275,7 @@ const OrderHistoryPage = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {completedOrders.map((order) => (
+                            {currentOrders.map((order) => (
                                 <tr key={order.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="font-medium text-blue-600">#{order.id}</span>
@@ -244,9 +299,9 @@ const OrderHistoryPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
-                                            {getStatusText(order.status)}
-                                        </span>
+                                        {order.status == 'Đã giao' ? <StatusBadge type="success" text={order.status} /> :
+                                            order.status == 'Đã hủy' ? <StatusBadge type="danger" text={order.status} /> :
+                                                <StatusBadge type="info" text={order.status} />}
                                         {order.cancelReason && (
                                             <div className="text-sm text-gray-500 mt-1">
                                                 {order.cancelReason}
@@ -254,21 +309,18 @@ const OrderHistoryPage = () => {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentStatusBadgeClass(order.paymentStatus)}`}>
-                                            {getPaymentStatusText(order.paymentStatus)}
-                                        </span>
+                                        {order.paymentStatus == 'Đã thanh toán' ? <StatusBadge type="success" text={order.paymentStatus} /> :
+                                            order.paymentStatus == 'Đã hoàn tiền' ? <StatusBadge type="danger" text={order.paymentStatus} /> :
+                                                <StatusBadge type="info" text={order.paymentStatus} />}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                                         {formatDate(order.completedDate)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
+                                        <ButtonViewMore
                                             onClick={() => navigate(`/admin/orders/order-detail/${order.id}`)}
-                                            className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                                        >
-                                            <FiEye className="w-4 h-4" />
-                                            Chi tiết
-                                        </button>
+                                            text="Chi tiết"
+                                        />
                                     </td>
                                 </tr>
                             ))}
@@ -277,29 +329,14 @@ const OrderHistoryPage = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                    <div className="flex justify-between items-center">
-                        <div className="text-sm text-gray-700">
-                            Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">10</span> trong số <span className="font-medium">20</span> đơn hàng
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                Trước
-                            </button>
-                            <button className="px-3 py-1 border rounded bg-blue-600 text-white">
-                                1
-                            </button>
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                2
-                            </button>
-                            <button className="px-3 py-1 border rounded hover:bg-gray-50">
-                                Sau
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={completedOrders.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                />
             </div>
-        </div>
+        </div >
     );
 };
 
