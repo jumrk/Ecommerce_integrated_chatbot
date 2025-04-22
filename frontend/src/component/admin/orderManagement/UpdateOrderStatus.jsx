@@ -1,40 +1,92 @@
 import React, { useState } from 'react';
-import { FiTruck, FiPackage, FiCheck, FiX } from 'react-icons/fi';
+import { FiCheckCircle, FiTruck, FiPackage, FiX } from 'react-icons/fi';
 
-const UpdateOrderStatus = ({ currentStatus, onUpdateStatus }) => {
+const UpdateOrderStatus = ({ idOrder, currentStatus, onUpdateStatus }) => {
     const [showStatusModal, setShowStatusModal] = useState(false);
-    const [newStatus, setNewStatus] = useState(currentStatus);
+    const [newStatus, setNewStatus] = useState('');
     const [note, setNote] = useState('');
-    const [trackingInfo, setTrackingInfo] = useState({
-        carrier: '',
-        trackingNumber: ''
-    });
-
-    const statusOptions = [
-        { value: 'pending', label: 'Chờ xác nhận', icon: FiPackage },
-        { value: 'processing', label: 'Đang xử lý', icon: FiPackage },
-        { value: 'shipping', label: 'Đang giao hàng', icon: FiTruck },
-        { value: 'completed', label: 'Hoàn thành', icon: FiCheck },
-        { value: 'cancelled', label: 'Đã hủy', icon: FiX }
-    ];
-
-    const handleSubmit = () => {
-        onUpdateStatus({
-            status: newStatus,
-            note,
-            trackingInfo: newStatus === 'shipping' ? trackingInfo : null
-        });
-        setShowStatusModal(false);
+    const [loading, setLoading] = useState(false);
+    // Định nghĩa luồng trạng thái và thông tin button
+    const statusFlow = {
+        ordered: {
+            nextStatus: 'confirmed',
+            buttonText: 'Xác nhận đơn hàng',
+            icon: <FiCheckCircle className="w-5 h-5" />,
+        },
+        confirmed: {
+            nextStatus: 'delivering',
+            buttonText: 'Bắt đầu giao hàng',
+            icon: <FiTruck className="w-5 h-5" />,
+        },
+        delivering: {
+            nextStatus: 'completed',
+            buttonText: 'Hoàn thành giao hàng',
+            icon: <FiPackage className="w-5 h-5" />,
+        },
     };
+
+    // Kiểm tra trạng thái có thể hủy
+    const canCancel = ['ordered', 'confirmed'].includes(currentStatus);
+
+    // Mở modal với trạng thái mới
+    const openModalWithStatus = (status) => {
+        setNewStatus(status);
+        setShowStatusModal(true);
+    };
+
+    // Xử lý submit
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            const updateData = {
+                status: newStatus,
+                note,
+            };
+            await onUpdateStatus(updateData);
+            setShowStatusModal(false);
+            setNote('');
+        } catch (error) {
+            console.error('Lỗi khi cập nhật trạng thái:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Nếu trạng thái là completed hoặc cancelled, không hiển thị button
+    if (!statusFlow[currentStatus] && !canCancel) {
+        return null;
+    }
+
+    // Lấy thông tin button cho trạng thái hiện tại (nếu có)
+    const currentAction = statusFlow[currentStatus];
 
     return (
         <>
-            <button
-                onClick={() => setShowStatusModal(true)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-                Cập nhật trạng thái
-            </button>
+            <div className="space-y-3">
+                {currentAction && (
+                    <button
+                        onClick={() => openModalWithStatus(currentAction.nextStatus)}
+                        disabled={loading}
+                        className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white font-medium transition-colors ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
+                    >
+                        {currentAction.icon}
+                        {loading ? 'Đang xử lý...' : currentAction.buttonText}
+                    </button>
+                )}
+
+                {canCancel && (
+                    <button
+                        onClick={() => openModalWithStatus('cancelled')}
+                        disabled={loading}
+                        className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white font-medium transition-colors ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+                            }`}
+                    >
+                        <FiX className="w-5 h-5" />
+                        {loading ? 'Đang xử lý...' : 'Hủy đơn hàng'}
+                    </button>
+                )}
+            </div>
 
             {showStatusModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -43,61 +95,6 @@ const UpdateOrderStatus = ({ currentStatus, onUpdateStatus }) => {
                             <h3 className="text-lg font-semibold mb-4">Cập nhật trạng thái đơn hàng</h3>
 
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Trạng thái mới
-                                    </label>
-                                    <select
-                                        value={newStatus}
-                                        onChange={(e) => setNewStatus(e.target.value)}
-                                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        {statusOptions.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {newStatus === 'shipping' && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Đơn vị vận chuyển
-                                            </label>
-                                            <select
-                                                value={trackingInfo.carrier}
-                                                onChange={(e) => setTrackingInfo(prev => ({
-                                                    ...prev,
-                                                    carrier: e.target.value
-                                                }))}
-                                                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="">Chọn đơn vị vận chuyển</option>
-                                                <option value="GHN">Giao Hàng Nhanh</option>
-                                                <option value="GHTK">Giao Hàng Tiết Kiệm</option>
-                                                <option value="VNPost">VNPost</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Mã vận đơn
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={trackingInfo.trackingNumber}
-                                                onChange={(e) => setTrackingInfo(prev => ({
-                                                    ...prev,
-                                                    trackingNumber: e.target.value
-                                                }))}
-                                                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Nhập mã vận đơn"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Ghi chú
@@ -114,16 +111,23 @@ const UpdateOrderStatus = ({ currentStatus, onUpdateStatus }) => {
 
                             <div className="mt-6 flex justify-end space-x-3">
                                 <button
-                                    onClick={() => setShowStatusModal(false)}
+                                    onClick={() => {
+                                        setShowStatusModal(false);
+                                        setNote('');
+                                    }}
                                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                                 >
                                     Hủy
                                 </button>
                                 <button
                                     onClick={handleSubmit}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    disabled={loading}
+                                    className={`px-4 py-2 rounded-lg text-white ${loading
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-600 hover:bg-blue-700'
+                                        }`}
                                 >
-                                    Cập nhật
+                                    {loading ? 'Đang xử lý...' : 'Cập nhật'}
                                 </button>
                             </div>
                         </div>

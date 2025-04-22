@@ -9,12 +9,12 @@ const ImageUpload = ({ images, onImageChange, onRemoveImage }) => {
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square">
                         <img
-                            src={image}
-                            alt={`Preview ${index + 1}`}
+                            src={image.preview}
+                            alt={`Preview ${index}`}
                             className="w-full h-full object-cover rounded-lg"
                         />
                         <button
-                            onClick={() => onRemoveImage(index)}
+                            onClick={() => onRemoveImage(image)}
                             className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                         >
                             <FiX />

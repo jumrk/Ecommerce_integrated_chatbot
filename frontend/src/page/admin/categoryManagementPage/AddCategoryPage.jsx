@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUpload, FaTimes } from 'react-icons/fa';
-import { useCategories } from '../../../hooks/admin/categoryHook/useCategories';
+import { createCategoryProduct } from '../../../api/category/categoryProduct';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 
 const AddCategoryPage = () => {
     const navigate = useNavigate();
-    const { addCategory } = useCategories();
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        icon: null,
-        isActive: true
+        image: null
     });
     const [errors, setErrors] = useState({});
+    const [notification, setNotification] = useState(null);
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value
         }));
         // Clear error when user types
         if (errors[name]) {
@@ -34,7 +35,7 @@ const AddCategoryPage = () => {
             if (file.size > 1024 * 1024) { // 1MB
                 setErrors(prev => ({
                     ...prev,
-                    icon: 'Kích thước ảnh không được vượt quá 1MB'
+                    image: 'Kích thước ảnh không được vượt quá 1MB'
                 }));
                 return;
             }
@@ -42,7 +43,7 @@ const AddCategoryPage = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreview(reader.result);
-                setFormData(prev => ({ ...prev, icon: file }));
+                setFormData(prev => ({ ...prev, image: file }));
             };
             reader.readAsDataURL(file);
         }
@@ -50,7 +51,7 @@ const AddCategoryPage = () => {
 
     const removeImage = () => {
         setPreview(null);
-        setFormData(prev => ({ ...prev, icon: null }));
+        setFormData(prev => ({ ...prev, image: null }));
     };
 
     const validateForm = () => {
@@ -68,13 +69,24 @@ const AddCategoryPage = () => {
 
         try {
             setLoading(true);
-            await addCategory(formData);
-            navigate('/admin/categories');
+
+            // Tạo FormData để gửi dữ liệu
+            const formDataToSend = new FormData();
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('description', formData.description);
+            if (formData.image) {
+                formDataToSend.append('category', formData.image);
+            }
+
+            await createCategoryProduct(formDataToSend);
+
+            // Hiển thị thông báo thành công
+            setNotification({ message: 'Thêm danh mục thành công!', type: 'success' });
+
+            // Điều hướng về trang danh mục
+            setTimeout(() => navigate('/admin/categories/list-category'), 3000);
         } catch (error) {
-            setErrors(prev => ({
-                ...prev,
-                submit: 'Có lỗi xảy ra khi thêm danh mục'
-            }));
+            setNotification({ message: 'Có lỗi xảy ra khi thêm danh mục!', type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -82,8 +94,19 @@ const AddCategoryPage = () => {
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Thêm danh mục sản phẩm</title>
+            </Helmet>
             <div className="max-w-2xl mx-auto">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">Thêm danh mục mới</h1>
+
+                {notification && (
+                    <Notification
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setNotification(null)}
+                    />
+                )}
 
                 <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
                     {/* Icon Upload */}
@@ -161,20 +184,6 @@ const AddCategoryPage = () => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
                             placeholder="Nhập mô tả danh mục"
                         />
-                    </div>
-
-                    {/* Status Toggle */}
-                    <div className="mb-6">
-                        <label className="flex items-center">
-                            <input
-                                type="checkbox"
-                                name="isActive"
-                                checked={formData.isActive}
-                                onChange={handleChange}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">Kích hoạt danh mục</span>
-                        </label>
                     </div>
 
                     {/* Error Message */}

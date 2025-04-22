@@ -12,18 +12,25 @@ const orderSchema = new mongoose.Schema({
             color: { type: String, required: true }
         }
     ],
-    shippingMethodId: { type: mongoose.Schema.Types.ObjectId, ref: 'shippingMethod', required: true },
+    orderCode: {
+        type: String, required: true, unique: true,
+    },
+    note: { type: String },
+    shippingMethod: { type: String, required: true },
     shippingFee: { type: Number, required: true },
-    paymentMethodId: { type: mongoose.Schema.Types.ObjectId, ref: 'paymentMethod', required: true },
+    paymentMethod: { type: String, required: true },
     paymentStatus: { type: String, required: true },
     subtotal: { type: Number, required: true },
     total: { type: Number, required: true },
     status: { type: String, enum: ['ordered', 'confirmed', 'delivering', 'completed', 'cancelled'], required: true },
     canCancel: { type: Boolean, default: true },
-    canRate: { type: Boolean, default: false },
-    trackingNumber: { type: String, required: true },
-    estimatedDelivery: { type: Date, required: true },
-    shipper: { type: mongoose.Schema.Types.ObjectId, ref: 'shipper', required: true },
+    isActive: { type: Boolean, default: true },
+    discount: { type: Number },
+    shipper: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'shipper', required: false,
+        default: null
+    },
     timeline: [
         {
             status: { type: String, required: true },

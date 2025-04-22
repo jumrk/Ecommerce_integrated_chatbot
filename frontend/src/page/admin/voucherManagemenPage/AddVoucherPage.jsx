@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
-import { toast } from 'react-toastify';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import Loading from '../../../component/loading/loading';
+import { addVoucher } from '../../../api/voucher/voucherService';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 
 const AddVoucherPage = () => {
     const navigate = useNavigate();
@@ -19,31 +21,46 @@ const AddVoucherPage = () => {
         description: ''
     });
 
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [showNotification, setShowNotification] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.code || !formData.value || !formData.minSpend || !formData.startDate || !formData.endDate) {
-            toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+            setNotification({ message: 'Vui lòng điền đầy đủ thông tin bắt buộc', type: 'error' });
+            setShowNotification(true);
             return;
         }
 
         try {
             setLoading(true);
-            // Giả lập API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast.success('Thêm mã giảm giá thành công');
-            navigate('/admin/vouchers');
+            const response = await addVoucher(formData);
+            if (!response.success) {
+                setNotification({ message: response.message, type: 'error' });
+                setShowNotification(true);
+                return;
+            }
+            setNotification({ message: response.message, type: 'success' });
+            setShowNotification(true);
+            setTimeout(() => {
+                navigate('/admin/vouchers/list-voucher');
+            }, 2000);
         } catch (error) {
-            toast.error('Có lỗi xảy ra');
+            setNotification({ message: 'Có lỗi xảy ra', type: 'error' });
+            setShowNotification(true);
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <LoadingSpinner />;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Thêm mới mã giảm giá</title>
+            </Helmet>
             <div className="max-w-3xl mx-auto">
                 <div className="flex items-center mb-6">
                     <button
@@ -56,6 +73,14 @@ const AddVoucherPage = () => {
                         Thêm mã giảm giá mới
                     </h1>
                 </div>
+
+                {showNotification && (
+                    <Notification
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setShowNotification(false)}
+                    />
+                )}
 
                 <div className="bg-white rounded-lg shadow p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">

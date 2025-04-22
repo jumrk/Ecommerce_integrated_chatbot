@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
-
+    const navigate = useNavigate()
     const slides = [
         {
             image: 'images/HeroImg/banner3.png',
@@ -107,7 +108,7 @@ const Hero = () => {
                             <button className="bg-black text-white px-6 md:px-10 py-2.5 md:py-3.5 rounded-none 
                                 text-sm md:text-base tracking-wider uppercase font-medium 
                                 transition-all duration-300 hover:bg-gray-800
-                                focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+                                focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2" onClick={() => { navigate('/directory/all-products') }}>
                                 Khám phá ngay
                             </button>
                         </motion.div>

@@ -1,26 +1,39 @@
-import React, { useState } from 'react';
-import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import React, { useState, useEffect } from 'react';
+import { FiPlus } from 'react-icons/fi';
+import Loading from '../../../component/loading/loading';
 import ConfirmDialog from '../../../component/common/ConfirmDialog';
 import { toast } from 'react-toastify';
 import ButtonEdit from '../../../component/button/ButtonEdit';
 import ButtonDelete from '../../../component/button/ButtonDelete';
+import { getCategories, addCategory, updateCategory, deleteCategory } from '../../../api/blog/categoryBlogSevice';
+import { Helmet } from 'react-helmet';
+
 const BlogCategoryPage = () => {
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([
-        { id: 1, name: 'Xu hướng', description: 'Các bài viết về xu hướng thời trang', postCount: 15 },
-        { id: 2, name: 'Thời trang', description: 'Bài viết về thời trang', postCount: 10 },
-        { id: 3, name: 'Lifestyle', description: 'Phong cách sống', postCount: 8 },
-    ]);
+    const [categories, setCategories] = useState([]);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ name: '', description: '' });
     const [editingId, setEditingId] = useState(null);
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setLoading(true);
+            try {
+                const response = await getCategories(); // Fetch categories from API
+                setCategories(response); // Set categories state
+            } catch (error) {
+                toast.error('Failed to fetch categories');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.name) {
             toast.error('Vui lòng nhập tên danh mục');
             return;
@@ -28,19 +41,17 @@ const BlogCategoryPage = () => {
 
         try {
             setLoading(true);
-            // API call to save/update category
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             if (editingId) {
-                setCategories(categories.map(cat =>
-                    cat.id === editingId ? { ...cat, ...formData } : cat
-                ));
+                // Update category
+                await updateCategory(editingId, formData);
+                setCategories(categories.map(cat => (cat._id === editingId ? { ...cat, ...formData } : cat)));
                 toast.success('Cập nhật danh mục thành công');
             } else {
-                setCategories([...categories, { id: Date.now(), ...formData, postCount: 0 }]);
+                // Add new category
+                const response = await addCategory(formData);
+                setCategories([...categories, response.newCategory]); // Add the new category to the list
                 toast.success('Thêm danh mục thành công');
             }
-
             resetForm();
         } catch (error) {
             toast.error('Có lỗi xảy ra');
@@ -51,7 +62,7 @@ const BlogCategoryPage = () => {
 
     const handleEdit = (category) => {
         setFormData({ name: category.name, description: category.description });
-        setEditingId(category.id);
+        setEditingId(category._id);
         setShowForm(true);
     };
 
@@ -63,9 +74,8 @@ const BlogCategoryPage = () => {
     const confirmDelete = async () => {
         try {
             setLoading(true);
-            // API call to delete category
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setCategories(categories.filter(cat => cat.id !== selectedCategory.id));
+            await deleteCategory(selectedCategory._id); // Delete category via API
+            setCategories(categories.filter(cat => cat._id !== selectedCategory._id)); // Update state
             toast.success('Xóa danh mục thành công');
         } catch (error) {
             toast.error('Có lỗi xảy ra khi xóa danh mục');
@@ -82,10 +92,13 @@ const BlogCategoryPage = () => {
         setShowForm(false);
     };
 
-    if (loading) return <LoadingSpinner />;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Danh mục bài viết</title>
+            </Helmet>
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Quản lý danh mục</h1>
@@ -163,7 +176,7 @@ const BlogCategoryPage = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {categories.map((category) => (
-                                <tr key={category.id} className="hover:bg-gray-50">
+                                <tr key={category._id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900">
                                             {category.name}

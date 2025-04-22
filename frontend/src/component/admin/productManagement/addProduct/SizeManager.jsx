@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { FiX, FiPlus } from 'react-icons/fi';
 
-const SizeManager = ({ sizes, onSizeChange }) => {
+const SizeManager = ({ sizes, onAddSize, onRemoveSize }) => {
     const [newSize, setNewSize] = useState('');
 
     const handleAddSize = () => {
         if (newSize && !sizes.includes(newSize)) {
-            onSizeChange([...sizes, newSize]);
+            console.log('Gọi onAddSize với size:', newSize); // Log để kiểm tra
+            onAddSize(newSize);
             setNewSize('');
         }
     };
 
     const handleRemoveSize = (sizeToRemove) => {
-        onSizeChange(sizes.filter(size => size !== sizeToRemove));
+        onRemoveSize(sizeToRemove); // Gọi hàm onRemoveSize từ props
     };
 
     return (

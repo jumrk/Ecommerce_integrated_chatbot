@@ -10,7 +10,7 @@ const ProductImages = ({ images, mainImage, setMainImage }) => {
                 <FadeInWhenVisible>
                     <div className="overflow-hidden rounded-lg">
                         <img
-                            src={mainImage}
+                            src={import.meta.env.VITE_API_URL + mainImage}
                             alt="Main product"
                             className="w-full h-[300px] md:h-[500px] object-cover rounded-lg transform transition-transform duration-300 hover:scale-105"
                         />
@@ -26,7 +26,7 @@ const ProductImages = ({ images, mainImage, setMainImage }) => {
                                     className={`w-full rounded-md overflow-hidden ${mainImage === image ? 'ring-2 ring-blue-500' : ''
                                         }`}
                                 >
-                                    <img src={image} alt={`Product view ${index + 1}`} />
+                                    <img src={import.meta.env.VITE_API_URL + image} alt={`Product view ${index + 1}`} />
                                 </button>
                             </ScaleUpWhenVisible>
                         ))}

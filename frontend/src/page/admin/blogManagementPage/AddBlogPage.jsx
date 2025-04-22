@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import Loading from '../../../component/loading/loading';
 import ImageUpload from '../../../component/common/ImageUpload';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { addBlog } from '../../../api/blog/blogSevice';
+import { getCategories } from '../../../api/blog/categoryBlogSevice';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 
 const AddBlogPage = () => {
     const navigate = useNavigate();
@@ -15,34 +19,70 @@ const AddBlogPage = () => {
         content: '',
         images: [],
         category: '',
-        author: ''
     });
+    const [categories, setCategories] = useState([]);
+    const [notification, setNotification] = useState({ message: '', type: '' });
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setLoading(true);
+            try {
+                const response = await getCategories();
+                setCategories(response);
+            } catch (error) {
+                toast.error('Failed to fetch categories');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.title || !formData.content || !formData.category) {
-            toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+        if (!formData.title || !formData.content || !formData.category || formData.images.length === 0) {
+            setNotification({ message: 'Vui lòng điền đầy đủ thông tin bắt buộc', type: 'error' });
             return;
         }
 
         try {
             setLoading(true);
-            // API call to save blog
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast.success('Thêm bài viết thành công');
-            navigate('/admin/blogs');
+            const formDataToSend = new FormData();
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('content', formData.content);
+            formDataToSend.append('category', formData.category);
+
+            formData.images.forEach(image => {
+                formDataToSend.append('images', image.file);
+            });
+
+            await addBlog(formDataToSend);
+            setNotification({ message: 'Thêm bài viết thành công', type: 'success' });
+            setTimeout(() => {
+                navigate('/admin/blogs/list-blog');
+            }, 2000);
         } catch (error) {
-            toast.error('Có lỗi xảy ra');
+            setNotification({ message: 'Có lỗi xảy ra', type: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <LoadingSpinner />;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Thêm mới bài viết</title>
+            </Helmet>
+            {notification.message && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification({ message: '', type: '' })}
+                />
+            )}
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center mb-6">
                     <button
@@ -93,23 +133,12 @@ const AddBlogPage = () => {
                                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="">Chọn danh mục</option>
-                                    <option value="Xu hướng">Xu hướng</option>
-                                    <option value="Thời trang">Thời trang</option>
-                                    <option value="Lifestyle">Lifestyle</option>
+                                    {categories.map(category => (
+                                        <option key={category._id} value={category._id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
                                 </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tác giả *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.author}
-                                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Nhập tên tác giả"
-                                />
                             </div>
                         </div>
 

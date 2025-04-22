@@ -3,10 +3,9 @@ import Categories from "./Categories";
 import CustomerReviews from "../CustomerReviews";
 import DiscountedProducts from "./DiscountedProducts";
 import FashionBlog from "../FashionBlog";
-import PersonalizedSuggestions from "./PersonalizedSuggestions";
+import PromoVideo from "./PromoVideo";
 import { FadeInWhenVisible } from "../../animation/FadeInWhenVisible";
 const Features = () => {
-    const isLoggedIn = false;
     return (
         <section className="py-12 bg-gray-100">
             <FadeInWhenVisible direction='up' delay={0.2}>
@@ -19,10 +18,10 @@ const Features = () => {
             <Categories />
             <BestSelling />
             <DiscountedProducts />
-            <PersonalizedSuggestions isLoggedIn={isLoggedIn} />
+            <PromoVideo />
             <FashionBlog />
             <CustomerReviews />
-        </section>
+        </section >
     );
 };
 

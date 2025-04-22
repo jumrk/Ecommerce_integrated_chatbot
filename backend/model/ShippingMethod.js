@@ -1,34 +1,16 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const ShippingSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String
-    },
-    type: {
-        type: String,
-        enum: ["internal", "store_pickup", "cod"], 
-        required: true
-    },
-    shippingFees: [
-        {
-            region: { type: String },
-            fee: { type: Number, min: 0 }
-        }
-    ],
-    codFee: {
-        type: Number,
-        min: 0,
-        default: 0 
-    },
-    status: {
-        type: String,
-        enum: ["Hoạt động", "Tạm ngừng", "Ngừng hoạt động"],
-        default: "Hoạt động"
-    }
+const shippingMethodSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    enabled: { type: Boolean, default: true },
+    description: { type: String }
 });
 
-module.exports = mongoose.model("Shipping", ShippingSchema);
+const shippingConfigSchema = new mongoose.Schema({
+    methods: [shippingMethodSchema]
+}, {
+    timestamps: true
+});
+
+module.exports = mongoose.model('ShippingConfig', shippingConfigSchema);

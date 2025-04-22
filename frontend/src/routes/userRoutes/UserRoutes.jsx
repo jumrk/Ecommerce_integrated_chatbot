@@ -14,13 +14,13 @@ import UserPage from '../../page/user/userPage/UserPage';
 import UserInfo from '../../component/user/UserInfo';
 import OrderList from '../../component/user/OrderList';
 import AddressList from '../../component/user/AddressList';
-import Notifications from '../../component/user/Notifications';
 import Favorites from '../../component/user/Favorites';
 import LoginPage from '../../page/authPage/LoginPage';
 import RegisterPage from '../../page/authPage/RegisterPage';
 import ForgotPasswordPage from '../../page/authPage/ForgotPassPage';
 import CheckoutPage from '../../page/user/checkoutPage/CheckoutPage';
-import { AuthSuccess, LogoutSuccess } from '../../utils/AuthSuccess';
+import { AuthSuccess, LogoutSuccess, LoginAdmin } from '../../utils/AuthSuccess';
+import BlogUser from '../../component/user/BlogUser';
 const UserRoutes = () => {
     return (
         <Routes>
@@ -40,7 +40,7 @@ const UserRoutes = () => {
                     <Route path="info" element={<UserInfo />} />
                     <Route path="orders" element={<OrderList />} />
                     <Route path="addresses" element={<AddressList />} />
-                    <Route path="notifications" element={<Notifications />} />
+                    <Route path="blogUser" element={<BlogUser />} />
                     <Route path="favorites" element={<Favorites />} />
                 </Route>
                 <Route path="/checkout" element={<CheckoutPage />} />
@@ -51,6 +51,8 @@ const UserRoutes = () => {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path='/auth-success' element={<AuthSuccess />} />
             <Route path='/logout-success' element={<LogoutSuccess />} />
+            <Route path='/loginAdmin' element={<LoginAdmin />} />
+
         </Routes>
     );
 };

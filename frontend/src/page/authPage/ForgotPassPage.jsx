@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { validateField } from '../../utils/validateFiled';
 import { ClipLoader } from 'react-spinners';
 import forgotPasswordAPI from '../../api/auth/forgotPasswordAPI';
+import { Helmet } from 'react-helmet';
 const ForgotPasswordPage = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +45,9 @@ const ForgotPasswordPage = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
+            <Helmet>
+                <title>Quên mật khẩu</title>
+            </Helmet>
             <div className="absolute w-full h-full">
                 <motion.div
                     className="absolute top-20 left-20 w-24 h-24 bg-cyan-200 rounded-full"

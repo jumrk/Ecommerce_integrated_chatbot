@@ -109,7 +109,9 @@ export const ButtonAddCart = ({ onClick }) => {
     );
 };
 
-const AddToCartButton = ({ isAdding, quantity, getStockForVariant, handleAddToCart }) => {
+export const AddToCartButton = ({ isAdding, quantity, getStockForVariant, handleAddToCart, selectedSize, selectedColor }) => {
+    const stock = getStockForVariant(selectedSize, selectedColor); // Lấy stock dựa trên size và color
+
     return (
         <button
             onClick={(e) => {
@@ -127,18 +129,17 @@ const AddToCartButton = ({ isAdding, quantity, getStockForVariant, handleAddToCa
                 ripple.classList.add('ripple');
 
                 button.appendChild(ripple);
-
                 ripple.addEventListener('animationend', () => {
                     ripple.remove();
                 });
 
                 handleAddToCart();
             }}
-            disabled={isAdding || getStockForVariant() < quantity}
-            className={`flex-1 relative overflow-hidden rounded-lg font-semibold text-white transition-all duration-300 
+            disabled={isAdding || stock < quantity}
+            className={`flex-1 relative overflow-hidden rounded-lg font-semibold text-white transition-all duration-300
                 ${isAdding
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : getStockForVariant() < quantity
+                    ? 'bg-green-500 hover:bg-green-600 cursor-wait'
+                    : stock < quantity
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0'
                 }`}
@@ -160,45 +161,40 @@ const AddToCartButton = ({ isAdding, quantity, getStockForVariant, handleAddToCa
                         opacity: 0;
                     }
                 }
+
+                .spinner {
+                    border: 2px solid transparent;
+                    border-top: 2px solid white;
+                    border-radius: 50%;
+                    width: 18px;
+                    height: 18px;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
                 `}
             </style>
-            <div className="relative flex items-center justify-center py-3 px-6">
-                <span className={`flex items-center gap-2 transition-all duration-300 
-                    ${isAdding ? 'opacity-0' : 'opacity-100'}`}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 animate-bounce"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                    >
-                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                    </svg>
-                    Thêm vào giỏ hàng
-                </span>
 
-                <span className={`absolute inset-0 flex items-center justify-center text-white transition-all duration-300 
-                    ${isAdding ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-95'}`}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 animate-pulse"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                        />
-                    </svg>
-                    Đã thêm vào giỏ
-                </span>
+            <div className="relative flex items-center justify-center py-3 px-6">
+                {isAdding ? (
+                    <div className="spinner"></div>
+                ) : (
+                    <span className="flex items-center gap-2 transition-all duration-300">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 animate-bounce"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                        </svg>
+                        Thêm vào giỏ hàng
+                    </span>
+                )}
             </div>
         </button>
     );
 };
-
-export default AddToCartButton;

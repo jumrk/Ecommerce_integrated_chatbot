@@ -1,12 +1,10 @@
-const express = require("express");
-const { createShipping, getAllShippings, getShippingById, updateShipping, deleteShipping } = require("../controller/shipping/ShippingMethodController");
-
+const express = require('express');
 const router = express.Router();
+const shippingConfigController = require('../controller/shipping/ShippingMethodController');
 
-router.post("/create-shipping", createShipping);
-router.get("/", getAllShippings);
-router.get("/:id", getShippingById);
-router.put("/update-shipping/:id", updateShipping);
-router.delete("/delete-shipping/:id", deleteShipping);
+router.get('/', shippingConfigController.getShippingConfig);
+router.post('/', shippingConfigController.createShippingConfig);
+router.put('/', shippingConfigController.updateShippingConfig);
+router.delete('/', shippingConfigController.deleteShippingConfig);
 
 module.exports = router;

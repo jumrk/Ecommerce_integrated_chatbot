@@ -58,12 +58,57 @@ const createVoucher = async (req, res) => {
 // Lấy tất cả các voucher
 const getAllVouchers = async (req, res) => {
     try {
+        console.log("🔄 Starting getAllVouchers...");
+
+        // Lấy danh sách voucher
         const vouchers = await Voucher.find();
-        res.status(200).json(vouchers);
+        console.log("📦 Found vouchers:", vouchers.length);
+
+        // Cập nhật trạng thái cho từng voucher
+        for (const voucher of vouchers) {
+            console.log(`\n🔄 Processing voucher: ${voucher.code}`);
+            const currentDate = new Date();
+            const startDate = new Date(voucher.startDate);
+            const endDate = new Date(voucher.endDate);
+
+            console.log("📅 Current date:", currentDate);
+            console.log("📅 Start date:", startDate);
+            console.log("📅 End date:", endDate);
+            console.log("📊 Usage count:", voucher.usageCount, "/", voucher.usageLimit);
+
+            let newStatus = 'Đang diễn ra';
+            if (voucher.usageCount >= voucher.usageLimit) {
+                newStatus = 'Đã hủy';
+            } else if (currentDate < startDate) {
+                newStatus = 'Chưa bắt đầu';
+            } else if (currentDate > endDate) {
+                newStatus = 'Đã kết thúc';
+            }
+
+            console.log("🔄 New status:", newStatus);
+
+            if (voucher.status !== newStatus) {
+                console.log("📝 Status changed, updating...");
+                await Voucher.findByIdAndUpdate(
+                    voucher._id,
+                    { status: newStatus },
+                    { new: true }
+                );
+                console.log("✅ Updated voucher status");
+            }
+        }
+
+        // Lấy lại danh sách voucher đã được cập nhật
+        const updatedVouchers = await Voucher.find();
+        console.log("✅ Final vouchers count:", updatedVouchers.length);
+
+        res.status(200).json(updatedVouchers);
     } catch (error) {
+        console.error("❌ Error in getAllVouchers:", error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Lấy một voucher theo ID
 const getVoucherById = async (req, res) => {
@@ -81,7 +126,7 @@ const getVoucherById = async (req, res) => {
 // Cập nhật một voucher theo ID
 const updateVoucher = async (req, res) => {
     try {
-        const { code, type, value, startDate, endDate, usageLimit } = req.body;
+        const { _id, code, type, value, startDate, endDate, usageLimit } = req.body;
 
         // Kiểm tra các trường bắt buộc
         if (code === '' || type === '' || value === '' || startDate === '' || endDate === '') {
@@ -113,7 +158,7 @@ const updateVoucher = async (req, res) => {
         }
 
         // Cập nhật voucher với dữ liệu hợp lệ
-        const voucher = await Voucher.findByIdAndUpdate(req.params.id, req.body, {
+        const voucher = await Voucher.findByIdAndUpdate(_id, req.body, {
             new: true,
             runValidators: true
         });
@@ -133,11 +178,11 @@ const deleteVoucher = async (req, res) => {
     try {
         const voucher = await Voucher.findByIdAndDelete(req.params.id);
         if (!voucher) {
-            return res.status(404).json({ message: 'Không tìm thấy voucher ❗' });
+            return res.status(404).json({ success: false, message: 'Không tìm thấy voucher ❗' });
         }
-        res.status(200).json({ message: 'Xóa voucher thành công ✅' });
+        res.status(200).json({ success: true, message: 'Xóa voucher thành công ✅' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 

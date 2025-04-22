@@ -1,72 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import CardReview from '../card/CardReview';
 import { RotateInWhenVisible } from '../animation/RotateInWhenVisible';
 import { ScaleUpWhenVisible } from '../animation/ScaleUpWhenVisible';
 import { SlideInWhenVisible } from '../animation/SlideInWhenVisible';
+import { getAllReview } from '../../api/product/productReview';
 const CustomerReviews = () => {
     const sliderRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+    const [reviews, setReview] = useState([])
 
-    const reviews = [
-        {
-            id: 1,
-            name: 'Nguyễn Thị Lan',
-            comment: 'Sản phẩm rất đẹp, chất lượng vượt mong đợi, giao hàng nhanh chóng, tôi rất hài lòng với dịch vụ này và sẽ tiếp tục ủng hộ!',
-            rating: 3,
-            date: '15/03/2025',
-        },
-        {
-            id: 2,
-            name: 'Trần Văn Hùng',
-            comment: 'Áo thun mặc thoải mái, giá cả hợp lý, sẽ quay lại mua thêm.',
-            rating: 2,
-            date: '20/02/2025',
-        },
-        {
-            id: 3,
-            name: 'Lê Thị Mai',
-            comment: 'Giày sneaker cực kỳ thời trang, đi êm chân, đáng tiền, tôi đã mua thêm một đôi khác vì quá thích!',
-            rating: 5,
-            date: '10/01/2025',
-        },
-        {
-            id: 4,
-            name: 'Phạm Quốc Anh',
-            comment: 'Túi xách sang trọng, thiết kế tinh tế, rất hài lòng.',
-            rating: 5,
-            date: '05/03/2025',
-        },
-        {
-            id: 5,
-            name: 'Hoàng Minh Thư',
-            comment: 'Quần jeans chất lượng cao, màu sắc đẹp, đúng như mô tả, dịch vụ tuyệt vời!',
-            rating: 5,
-            date: '25/02/2025',
-        },
-        {
-            id: 6,
-            name: 'Lê Thị Mai',
-            comment: 'Giày sneaker cực kỳ thời trang, đi êm chân, đáng tiền, tôi đã mua thêm một đôi khác vì quá thích!',
-            rating: 5,
-            date: '10/01/2025',
-        },
-        {
-            id: 7,
-            name: 'Phạm Quốc Anh',
-            comment: 'Túi xách sang trọng, thiết kế tinh tế, rất hài lòng.',
-            rating: 5,
-            date: '05/03/2025',
-        },
-        {
-            id: 8,
-            name: 'Hoàng Minh Thư',
-            comment: 'Quần jeans chất lượng cao, màu sắc đẹp, đúng như mô tả, dịch vụ tuyệt vời!',
-            rating: 5,
-            date: '25/02/2025',
-        },
-    ];
+    useEffect(() => {
+        const fetchData = async () => {
+            const repsonse = await getAllReview()
+            setReview(repsonse.reviews)
+        }
+        fetchData()
+    }, [])
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -110,8 +61,8 @@ const CustomerReviews = () => {
                     onMouseLeave={handleMouseUp}
                 >
                     {reviews.map((review) => (
-                        <SlideInWhenVisible key={review.id} delay={0.2}>
-                            <CardReview rating={review.rating} id={review.id} namePerson={review.name} comment={review.comment} date={review.date} />
+                        <SlideInWhenVisible key={review._id} delay={0.2}>
+                            <CardReview rating={review.rating} id={review._id} namePerson={review.fullName} comment={review.comment} date={review.createdAt} />
                         </SlideInWhenVisible>
                     ))}
                 </div>

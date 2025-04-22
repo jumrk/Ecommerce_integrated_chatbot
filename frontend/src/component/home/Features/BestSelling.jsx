@@ -1,12 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CardProduct from "../../card/CardProduct";
 import { ButtonOrange } from "../../button/Button";
 import useShowMore from "../../../hooks/useShowMore";
-import products from "../../../data/Product";
 import { FadeInWhenVisible } from "../../animation/FadeInWhenVisible";
 import { SlideInWhenVisible } from "../../animation/SlideInWhenVisible";
+import { getProductBesselling } from "../../../api/product/productService";
+
 const BestSelling = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const fetchBestSellingProducts = async () => {
+            try {
+                const data = await getProductBesselling();
+                const products = data.filter(product => product.category.status)
+                setProducts(products);
+            } catch (error) {
+                console.error("Lỗi khi lấy sản phẩm bán chạy:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBestSellingProducts();
+    }, []);
+
     const { showMore, toggleShowMore, visibleItems } = useShowMore(products, 8);
+
+    if (loading) {
+        return (
+            <section className="py-12 bg-gray-50">
+                <div className="text-center">Đang tải sản phẩm...</div>
+            </section>
+        );
+    }
 
     return (
         <section className="py-12 bg-gray-50 relative overflow-hidden">
@@ -21,20 +48,24 @@ const BestSelling = () => {
                     </div>
                 </FadeInWhenVisible>
 
-                <SlideInWhenVisible direction='down' delay={0.2}>
+                <SlideInWhenVisible direction="down" delay={0.2}>
                     <div className="text-gray-600 mt-2">
                         Khám phá những sản phẩm được yêu thích nhất của chúng tôi!
                     </div>
                 </SlideInWhenVisible>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {visibleItems.map((product) => (
-                        <div key={product.id} className="h-full">
+                        <div key={product._id} className="h-full">
                             <CardProduct
                                 {...product}
+                                discountedPrice={
+                                    product.discount
+                                        ? product.price * (1 - product.discount / 100)
+                                        : product.price
+                                }
                             />
                         </div>
                     ))}
@@ -48,7 +79,7 @@ const BestSelling = () => {
                     </div>
                 )}
             </div>
-        </section >
+        </section>
     );
 };
 

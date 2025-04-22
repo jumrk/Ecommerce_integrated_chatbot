@@ -1,8 +1,21 @@
 import api from "../axiosConfig";
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getAddressesAPI = async () => {
     try {
+        await delay(2000);
         const response = await api.get("/address");
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi khi lấy địa chỉ người dùng:", error);
+        throw error.response?.data || { message: "Có lỗi xảy ra, vui lòng thử lại." };
+    }
+};
+
+// API: Lấy địa chỉ của người dùng bằng params
+export const getAddressParamsAPI = async (id) => {
+    try {
+        const response = await api.get("/address/" + id);
         return response.data;
     } catch (error) {
         console.error("Lỗi khi lấy địa chỉ người dùng:", error);

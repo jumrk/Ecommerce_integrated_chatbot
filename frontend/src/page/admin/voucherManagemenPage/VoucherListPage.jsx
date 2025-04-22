@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
-import { toast } from 'react-toastify';
+import { FiSearch, FiFilter } from 'react-icons/fi';
+import Loading from '../../../component/loading/loading';
 import EditVoucherModal from '../../../component/admin/voucherManagement/EditVoucherModal';
 import StatusCustom from '../../../component/condition/ConditionCustom';
 import Pagination from '../../../component/pagination/Pagination';
 import ButtonDelete from '../../../component/button/ButtonDelete';
 import ButtonEdit from '../../../component/button/ButtonEdit';
+import { getListVoucher, deleteVoucher } from '../../../api/voucher/voucherService';
+import Notification from '../../../component/notification/Notification';
+import ConfirmDialog from '../../../component/common/ConfirmDialog';
+import { Helmet } from 'react-helmet';
+import CountdownTimer from '../../../component/CountdownTimer/CountdownTimer';
+
 const VoucherListPage = () => {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [vouchers, setVouchers] = useState([]);
     const [filterOpen, setFilterOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+    const [voucherToDelete, setVoucherToDelete] = useState(null);
     const [filters, setFilters] = useState({
         status: '',
         type: '',
@@ -26,169 +31,30 @@ const VoucherListPage = () => {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = vouchers.slice(indexOfFirstItem, indexOfLastItem);
-    useEffect(() => {
-        // Giả lập API call
-        setTimeout(() => {
-            setVouchers([
-                {
-                    id: 1,
-                    code: "SUMMER2024",
-                    type: "percentage", // percentage hoặc fixed
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hoạt động",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 2,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hết hạn",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 3,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Chưa bắt đầu",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 4,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Chưa bắt đầu",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 5,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hoạt động",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 6,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hết hạn",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 7,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Chưa bắt đầu",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 8,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Chưa bắt đầu",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 9,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hoạt động",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 10,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Hết hạn",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                },
-                {
-                    id: 11,
-                    code: "SUMMER2024",
-                    type: "percentage",
-                    value: 20,
-                    minSpend: 1000000,
-                    maxDiscount: 200000,
-                    startDate: "2024-06-01T00:00:00Z",
-                    endDate: "2024-08-31T23:59:59Z",
-                    usageLimit: 100,
-                    usageCount: 45,
-                    status: "Chưa bắt đầu",
-                    description: "Giảm 20% cho đơn hàng từ 1,000,000đ"
-                }
 
-                // Thêm dữ liệu mẫu khác...
-            ]);
+    // State cho thông báo
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [showNotification, setShowNotification] = useState(false);
+
+    // Hàm để lấy danh sách voucher
+    const fetchVouchers = async () => {
+        setLoading(true);
+        try {
+            console.log("🔄 Fetching vouchers...");
+            const response = await getListVoucher();
+            console.log("📦 Received vouchers:", response);
+            setVouchers(response || []);
+        } catch (error) {
+            console.error('❌ Error fetching vouchers:', error);
+            setNotification({ message: 'Có lỗi xảy ra khi lấy danh sách voucher', type: 'error' });
+            setShowNotification(true);
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
+    };
+
+    useEffect(() => {
+        fetchVouchers(); // Gọi hàm fetchVouchers khi component được mount
     }, []);
 
     const formatPrice = (price) => {
@@ -206,75 +72,46 @@ const VoucherListPage = () => {
         }).format(new Date(dateString));
     };
 
-    const getStatusBadgeClass = (status) => {
-        switch (status) {
-            case 'active':
-                return 'bg-green-100 text-green-800';
-            case 'expired':
-                return 'bg-red-100 text-red-800';
-            case 'scheduled':
-                return 'bg-blue-100 text-blue-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
+    const handleDelete = (id) => {
+        setVoucherToDelete(id);
+        setIsConfirmDialogOpen(true);
     };
 
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'active':
-                return 'Đang hoạt động';
-            case 'expired':
-                return 'Hết hạn';
-            case 'scheduled':
-                return 'Chưa bắt đầu';
-            default:
-                return status;
-        }
-    };
-
-    const handleDelete = async (id) => {
-        if (!window.confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) return;
+    const confirmDelete = async () => {
+        if (!voucherToDelete) return;
 
         try {
             setLoading(true);
-            // Giả lập API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setVouchers(vouchers.filter(voucher => voucher.id !== id));
-            toast.success('Xóa mã giảm giá thành công');
+            const response = await deleteVoucher(voucherToDelete);
+            if (!response.success) {
+                setNotification({ message: response.message, type: 'error' });
+                setShowNotification(true);
+                return;
+            }
+            setNotification({ message: 'Xóa mã giảm giá thành công', type: 'success' });
+            fetchVouchers()
+            setLoading(false)
+            setShowNotification(true);
         } catch (error) {
-            toast.error('Có lỗi xảy ra khi xóa mã giảm giá');
+            setNotification({ message: 'Có lỗi xảy ra khi xóa mã giảm giá', type: 'error' });
+            setShowNotification(true);
         } finally {
             setLoading(false);
+            setIsConfirmDialogOpen(false);
+            setVoucherToDelete(null);
         }
     };
-
     const handleEdit = (voucher) => {
         setSelectedVoucher(voucher);
         setIsEditModalOpen(true);
     };
-
-    const handleEditModalClose = (wasUpdated) => {
-        if (wasUpdated) {
-            // Giả lập API call để refresh data
-            setLoading(true);
-            setTimeout(() => {
-                // Cập nhật lại danh sách voucher
-                const updatedVouchers = vouchers.map(v =>
-                    v.id === selectedVoucher.id ? { ...v, ...selectedVoucher } : v
-                );
-                setVouchers(updatedVouchers);
-                setLoading(false);
-                toast.success('Cập nhật mã giảm giá thành công');
-            }, 500);
-        }
+    const handleEditModalClose = () => {
         setIsEditModalOpen(false);
-        setSelectedVoucher(null);
-    };
+    }
+
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
-        // Thực hiện tìm kiếm
-        // Trong thực tế, có thể sử dụng debounce để tránh gọi API quá nhiều
     };
 
     const handleFilterChange = (name, value) => {
@@ -282,15 +119,34 @@ const VoucherListPage = () => {
         // Thực hiện lọc
     };
 
-    if (loading) return <LoadingSpinner />;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Danh sách mã giảm giá</title>
+            </Helmet>
+            <ConfirmDialog
+                isOpen={isConfirmDialogOpen}
+                title="Xác nhận xóa"
+                message="Bạn có chắc chắn muốn xóa mã giảm giá này?"
+                onConfirm={confirmDelete}
+                onClose={() => setIsConfirmDialogOpen(false)}
+            />
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Quản lý mã giảm giá</h1>
                 </div>
+
+                {/* Thông báo */}
+                {showNotification && (
+                    <Notification
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setShowNotification(false)}
+                    />
+                )}
 
                 {/* Search and Filter */}
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -395,7 +251,7 @@ const VoucherListPage = () => {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.map((voucher) => (
-                                    <tr key={voucher.id} className="hover:bg-gray-50">
+                                    <tr key={voucher._id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">
                                                 {voucher.code}
@@ -429,31 +285,44 @@ const VoucherListPage = () => {
                                             <div className="text-sm text-gray-500">
                                                 đến {formatDate(voucher.endDate)}
                                             </div>
+                                            {voucher.status === 'Đang diễn ra' && (
+                                                <div className="mt-2">
+                                                    <CountdownTimer endDate={voucher.endDate} />
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {voucher.usageCount}/{voucher.usageLimit}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {voucher.status === "Hoạt động" ? <StatusCustom
-                                                type={"success"}
-                                                text={voucher.status}
-                                            /> : voucher.status === "Hết hạn" ? <StatusCustom
-                                                type={"danger"}
-                                                text={voucher.status}
-                                            /> : <StatusCustom
-                                                type={"warning"}
-                                                text={voucher.status}
-                                            />}
-
-
-
+                                            {voucher.status === "Đang diễn ra" ? (
+                                                <StatusCustom
+                                                    type={"success"}
+                                                    text={voucher.status}
+                                                />
+                                            ) : voucher.status === "Đã kết thúc" ? (
+                                                <StatusCustom
+                                                    type={"danger"}
+                                                    text={voucher.status}
+                                                />
+                                            ) : voucher.status === "Chưa bắt đầu" ? (
+                                                <StatusCustom
+                                                    type={"warning"}
+                                                    text={voucher.status}
+                                                />
+                                            ) : (
+                                                <StatusCustom
+                                                    type={"danger"}
+                                                    text={voucher.status}
+                                                />
+                                            )}
                                         </td>
                                         <td className="flex justify-end gap-2 mt-4 whitespace-nowrap text-right text-sm font-medium">
                                             <ButtonEdit
                                                 onClick={() => handleEdit(voucher)}
                                             />
                                             <ButtonDelete
-                                                onClick={() => handleDelete(voucher.id)}
+                                                onClick={() => handleDelete(voucher._id)}
                                             />
                                         </td>
                                     </tr>
@@ -472,13 +341,13 @@ const VoucherListPage = () => {
                 />
             </div>
 
-            {/* Add EditVoucherModal */}
             <EditVoucherModal
                 isOpen={isEditModalOpen}
                 onClose={handleEditModalClose}
                 voucher={selectedVoucher}
+                onUpdate={fetchVouchers}
             />
-        </div >
+        </div>
     );
 };
 

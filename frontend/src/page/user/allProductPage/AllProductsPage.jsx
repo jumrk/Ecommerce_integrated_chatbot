@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 import CardProduct from '../../../component/card/CardProduct';
 import ProductFilterSidebar from '../../../component/Sidebar/ProductFilterSidebar';
 import { ButtonOrange } from '../../../component/button/Button';
-import products from '../../../data/Product';
 import { ScaleUpWhenVisible } from '../../../component/animation/ScaleUpWhenVisible';
+import { getProducts } from '../../../api/product/productService';
+import Loading from '../../../component/loading/loading';
 const AllProductsPage = () => {
     const { categoryParam: urlCategory } = useParams();
     const [filters, setFilters] = useState({
@@ -15,64 +17,111 @@ const AllProductsPage = () => {
         mobileOpen: false,
     });
 
-
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [visibleProducts, setVisibleProducts] = useState(8);
 
     useEffect(() => {
-        if (urlCategory) {
-            const normalizedCategory = urlCategory
-                .toLowerCase()
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-            setFilters((prev) => ({
-                ...prev,
-                category: normalizedCategory,
-            }));
-        } else {
-            setFilters((prev) => ({
-                ...prev,
-                category: '',
-            }));
-        }
+        const fetchProducts = async () => {
+            try {
+                // Cập nhật filters.category từ urlCategory
+                if (urlCategory) {
+                    const normalizedCategory = urlCategory
+                    setFilters((prev) => ({
+                        ...prev,
+                        category: normalizedCategory,
+                    }));
+                } else {
+                    setFilters((prev) => ({
+                        ...prev,
+                        category: '',
+                    }));
+                }
+
+                // Sau khi cập nhật filters.category, gọi API lấy sản phẩm
+                const data = await getProducts();
+                const products = data.filter(product => product.category.status)
+                setProducts(products);
+            } catch (error) {
+                setError(error);
+                console.error("Lỗi khi lấy sản phẩm:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
     }, [urlCategory]);
 
-    const filteredProducts = products.filter((product) => {
-        const matchesCategory = !filters.category || product.category === filters.category;
-        const matchesPrice = product.price >= filters.price.min && product.price <= filters.price.max;
-        const matchesColor = filters.color.length === 0 || filters.color.includes(product.color);
-        const matchesSize = filters.size.length === 0 || filters.size.includes(product.size);
-
-        return matchesCategory && matchesPrice && matchesColor && matchesSize;
-    });
-
-    const loadMoreProducts = () => {
-        setVisibleProducts((prev) => prev + 8);
-    };
-    const toggleMobileMenu = () => {
-        setFilters((prev) => ({ ...prev, mobileOpen: !prev.mobileOpen }));
-    };
-    const currentProducts = filteredProducts.slice(0, visibleProducts);
-
-    const handleFilterChange = (newFilters) => {
+    const handleFilterChange = useCallback((newFilters) => {
         setFilters(prev => ({
             ...prev,
             ...newFilters,
             mobileOpen: prev.mobileOpen
         }));
+    }, []);
+
+    const availableColors = useMemo(() => {
+        const colors = new Set();
+        products.forEach(product => {
+            product.colors.forEach(color => {
+                colors.add(color.value);
+            });
+        });
+        return Array.from(colors);
+    }, [products]);
+
+    const filteredProducts = useMemo(() => {
+        return products.filter((product) => {
+            const matchesCategory = !filters.category || product.category.name === filters.category;
+            const matchesPrice = product.price >= filters.price.min && product.price <= filters.price.max;
+            const matchesColor = filters.color.length === 0 || product.colors.some(color => filters.color.includes(color.value));
+            const matchesSize = filters.size.length === 0 || product.sizes.some(size => filters.size.includes(size));
+            return matchesCategory && matchesPrice && matchesColor && matchesSize;
+        });
+    }, [products, filters]);
+
+    const loadMoreProducts = () => {
+        setVisibleProducts((prev) => prev + 8);
     };
 
+    const toggleMobileMenu = () => {
+        setFilters((prev) => ({ ...prev, mobileOpen: !prev.mobileOpen }));
+    };
+
+    const currentProducts = filteredProducts.slice(0, visibleProducts);
+
+    const renderProducts = () => {
+        if (error) {
+            return <p className="text-center text-red-500">Lỗi khi tải sản phẩm: {error.message}</p>;
+        }
+
+        return currentProducts.map((product) => (
+            <CardProduct key={product._id} {...product} images={product.images} />
+        ));
+    };
+
+    if (loading) {
+        return <Loading />
+    }
     return (
         <div className="flex min-h-screen bg-gray-100">
+            <Helmet>
+                <title>{urlCategory ? urlCategory : 'Tất cả sản phẩm'}</title>
+            </Helmet>
             <div className="hidden md:block w-64 bg-white shadow-lg rounded-r-lg sticky top-16 h-[calc(100vh-64px)]">
-                <ProductFilterSidebar onFilterChange={handleFilterChange} initialCategory={filters.category} />
+                <ProductFilterSidebar
+                    onFilterChange={handleFilterChange}
+                    initialCategory={filters.category}
+                    availableColors={availableColors}
+                />
             </div>
 
             <div>
                 {!filters.mobileOpen && (
                     <button
-                        className="md:hidden fixed top-20 left-4 z-30 bg-gray-800 text-white p-2 
-                    rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300"
+                        className="md:hidden fixed top-20 left-4 z-30 bg-gray-800 text-white p-2 rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300"
                         onClick={toggleMobileMenu}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,11 +133,16 @@ const AllProductsPage = () => {
                     <div className="fixed inset-0 z-10 bg-black bg-opacity-50" onClick={toggleMobileMenu} />
                 )}
             </div>
+
             <div
                 className={`fixed inset-y-16 z-20 left-0 w-64 bg-white shadow-lg transform transition-all duration-300 ease-in-out ${filters.mobileOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
-                <ProductFilterSidebar onFilterChange={handleFilterChange} initialCategory={filters.category} />
+                <ProductFilterSidebar
+                    onFilterChange={handleFilterChange}
+                    initialCategory={filters.category}
+                    availableColors={availableColors}
+                />
                 <button
                     className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300"
                     onClick={() => setFilters((prev) => ({ ...prev, mobileOpen: false }))}
@@ -112,12 +166,10 @@ const AllProductsPage = () => {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {currentProducts.map((product) => (
-                        <CardProduct key={product.id} {...product} />
-                    ))}
+                    {renderProducts()}
                 </div>
 
-                {filteredProducts.length === 0 && (
+                {filteredProducts.length === 0 && !loading && (
                     <div className="text-center text-gray-600 mt-8">
                         Không tìm thấy sản phẩm nào phù hợp.
                     </div>

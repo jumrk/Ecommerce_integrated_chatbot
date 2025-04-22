@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { updateVoucher } from '../../../api/voucher/voucherService';
 
-const EditVoucherModal = ({ isOpen, onClose, voucher }) => {
+const EditVoucherModal = ({ isOpen, onClose, voucher, onUpdate }) => {
     const [formData, setFormData] = useState({
         code: '',
         type: 'percentage',
@@ -38,10 +39,15 @@ const EditVoucherModal = ({ isOpen, onClose, voucher }) => {
         }
 
         try {
-            // Giả lập API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log(formData)
+            const response = await updateVoucher(formData);
+            if (!response.success) {
+                toast.error(response.message);
+                return;
+            }
             toast.success('Cập nhật mã giảm giá thành công');
-            onClose(true); // true indicates successful update
+            onUpdate();
+            onClose(true);
         } catch (error) {
             toast.error('Có lỗi xảy ra khi cập nhật');
         }

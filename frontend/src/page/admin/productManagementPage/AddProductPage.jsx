@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import BasicInformation from '../../../component/admin/productManagement/addProduct/BasicInformation';
 import ImageUpload from '../../../component/admin/productManagement/addProduct/ImageUpload';
 import ProductVariants from '../../../component/admin/productManagement/addProduct/ProductVariants';
 import ProductSpecifications from '../../../component/admin/productManagement/addProduct/ProductSpecifications';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import Loading from '../../../component/loading/loading';
 import ConfirmDialog from '../../../component/common/ConfirmDialog';
-import { useImageUpload } from '../../../hooks/admin/addProductHook/useImageUpload';
 import { useProductVariants } from '../../../hooks/admin/addProductHook/useProductVariants';
+import { addProduct } from '../../../api/product/productService';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 
 const AddProductPage = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
-
+    const [notification, setNotification] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         price: '',
         category: '',
+        discount: '',
         description: '',
         specifications: {
             material: '',
@@ -30,7 +32,7 @@ const AddProductPage = () => {
     });
 
     const [errors, setErrors] = useState({});
-    const { images, handleImageChange, removeImage } = useImageUpload();
+    const [images, setImages] = useState([]);
     const productVariants = useProductVariants();
 
     // Theo dõi thay đổi form
@@ -53,7 +55,6 @@ const AddProductPage = () => {
             [name]: value
         }));
         setHasChanges(true);
-        // Xóa lỗi khi người dùng sửa
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
@@ -61,72 +62,77 @@ const AddProductPage = () => {
 
     const handleSpecificationsChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            specifications: {
-                ...prev.specifications,
-                [name]: value
-            }
-        }));
+        if (name === 'description') {
+            setFormData(prev => ({
+                ...prev,
+                description: value
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                specifications: {
+                    ...prev.specifications,
+                    [name]: value
+                }
+            }));
+        }
         setHasChanges(true);
     };
 
-    const validateForm = () => {
-        const newErrors = {};
+    // Hàm kiểm tra form có hợp lệ không
+    const isFormValid = () => {
+        const isBasicInfoValid =
+            formData.name.trim() &&
+            formData.price &&
+            formData.category;
 
-        // Validate basic information
-        if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập tên sản phẩm';
-        if (!formData.price) newErrors.price = 'Vui lòng nhập giá sản phẩm';
-        if (!formData.category) newErrors.category = 'Vui lòng chọn danh mục';
+        const isImageValid = images.length > 0;
 
-        // Validate images
-        if (images.length === 0) newErrors.images = 'Vui lòng thêm ít nhất một hình ảnh';
+        const isVariantsValid =
+            productVariants.colors.length > 0 &&
+            (productVariants.productType === 'simple' || productVariants.sizes.length > 0);
 
-        // Validate variants
-        if (productVariants.colors.length === 0) {
-            newErrors.colors = 'Vui lòng thêm ít nhất một màu sắc';
-        }
+        const isStockValid = Object.values(productVariants.stock).some(value => value > 0);
 
-        if (productVariants.productType === 'variable' && productVariants.sizes.length === 0) {
-            newErrors.sizes = 'Vui lòng thêm ít nhất một kích thước';
-        }
-
-        // Validate stock
-        const hasStock = Object.values(productVariants.stock).some(value => value > 0);
-        if (!hasStock) newErrors.stock = 'Vui lòng nhập số lượng tồn kho';
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return isBasicInfoValid && isImageValid && isVariantsValid && isStockValid;
     };
 
     const handleSubmit = async () => {
-        if (!validateForm()) {
-            toast.error('Vui lòng kiểm tra lại thông tin sản phẩm');
-            return;
-        }
-
+        // Không cần validateForm() và toast.error nữa vì nút đã bị khóa nếu form không hợp lệ
         try {
             setIsLoading(true);
-            const productData = {
-                ...formData,
-                images,
-                productType: productVariants.productType,
-                colors: productVariants.colors,
-                sizes: productVariants.sizes,
-                stock: productVariants.stock,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
 
-            // Gọi API để lưu sản phẩm
-            // await addProduct(productData);
+            const formDataToSend = new FormData();
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('price', formData.price);
+            formDataToSend.append('category', formData.category);
+            formDataToSend.append('discount', formData.discount || 0); // Gán mặc định nếu không nhập
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('specifications', JSON.stringify(formData.specifications));
+            formDataToSend.append('productType', productVariants.productType);
+            formDataToSend.append('colors', JSON.stringify(productVariants.colors));
+            formDataToSend.append('sizes', JSON.stringify(productVariants.sizes));
+            formDataToSend.append('stock', JSON.stringify(productVariants.stock));
 
-            toast.success('Thêm sản phẩm thành công');
-            setHasChanges(false);
-            navigate('/admin/products');
+            images.forEach(image => {
+                formDataToSend.append('images', image.file);
+            });
+
+            const response = await addProduct(formDataToSend);
+            setNotification({
+                message: response.message,
+                type: !response.success ? 'error' : 'success'
+            });
+            setTimeout(() => {
+                setHasChanges(false);
+                navigate('/admin/products/list-product');
+            }, 3000);
         } catch (error) {
             console.error('Error adding product:', error);
-            toast.error('Có lỗi xảy ra khi thêm sản phẩm');
+            setNotification({
+                message: 'Có lỗi xảy ra khi thêm sản phẩm',
+                type: 'error'
+            });
         } finally {
             setIsLoading(false);
         }
@@ -146,12 +152,42 @@ const AddProductPage = () => {
         navigate('/admin/products');
     };
 
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        const newImages = files.map((file) => ({
+            file,
+            preview: URL.createObjectURL(file)
+        }));
+        setImages((prev) => [...prev, ...newImages]);
+        setHasChanges(true);
+    };
+
+    const close = () => {
+        setNotification(null);
+    };
+
+    const removeImage = (imageToRemove) => {
+        URL.revokeObjectURL(imageToRemove.preview);
+        setImages((prev) => prev.filter((image) => image.preview !== imageToRemove.preview));
+        setHasChanges(true);
+    };
+
     if (isLoading) {
-        return <LoadingSpinner />;
+        return <Loading />;
     }
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Thêm sản phẩm</title>
+            </Helmet>
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={close}
+                />
+            )}
             <div className="max-w-6xl mx-auto">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">Thêm sản phẩm mới</h1>
 
@@ -188,16 +224,15 @@ const AddProductPage = () => {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || !isFormValid()} // Khóa nút nếu form không hợp lệ
                         className={`px-6 py-2 bg-blue-600 text-white rounded-lg transition-colors
-                            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                            ${isLoading || !isFormValid() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
                     >
                         {isLoading ? 'Đang xử lý...' : 'Thêm sản phẩm'}
                     </button>
                 </div>
             </div>
 
-            {/* Confirm Dialog */}
             <ConfirmDialog
                 isOpen={showConfirmDialog}
                 onClose={() => setShowConfirmDialog(false)}

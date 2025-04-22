@@ -30,26 +30,55 @@ const ProductVariants = ({
                     Loại sản phẩm
                 </label>
                 <div className="flex gap-4">
-                    <label className="flex items-center">
-                        <input
-                            type="radio"
-                            value="simple"
-                            checked={productType === 'simple'}
-                            onChange={(e) => setProductType(e.target.value)}
-                            className="mr-2"
-                        />
-                        Đơn giản
-                    </label>
-                    <label className="flex items-center">
-                        <input
-                            type="radio"
-                            value="variable"
-                            checked={productType === 'variable'}
-                            onChange={(e) => setProductType(e.target.value)}
-                            className="mr-2"
-                        />
-                        Có biến thể
-                    </label>
+                    <div className="flex gap-4">
+                        <label className="flex items-center cursor-pointer group">
+                            <input
+                                type="radio"
+                                value="simple"
+                                hidden={true}
+                                checked={productType === 'simple'}
+                                onChange={(e) => setProductType(e.target.value)}
+                                className="peer"
+                            />
+                            <span className="w-5 h-5 mr-2 inline-block border-2 border-gray-300 rounded-full 
+                     group-hover:border-blue-500 transition-colors 
+                     peer-checked:bg-blue-500 peer-checked:border-blue-500 
+                     peer-checked:after:content-[''] peer-checked:after:w-3 
+                     peer-checked:after:h-3 peer-checked:after:bg-white 
+                     peer-checked:after:rounded-full peer-checked:after:absolute 
+                     peer-checked:after:top-1/2 peer-checked:after:left-1/2 
+                     peer-checked:after:-translate-x-1/2 peer-checked:after:-translate-y-1/2 
+                     relative">
+                            </span>
+                            <span className="text-gray-700 group-hover:text-blue-500 transition-colors">
+                                Đơn giản
+                            </span>
+                        </label>
+
+                        <label className="flex items-center cursor-pointer group">
+                            <input
+                                type="radio"
+                                value="variable"
+                                hidden={true}
+                                checked={productType === 'variable'}
+                                onChange={(e) => setProductType(e.target.value)}
+                                className="peer"
+                            />
+                            <span className="w-5 h-5 mr-2 inline-block border-2 border-gray-300 rounded-full 
+                     group-hover:border-blue-500 transition-colors 
+                     peer-checked:bg-blue-500 peer-checked:border-blue-500 
+                     peer-checked:after:content-[''] peer-checked:after:w-3 
+                     peer-checked:after:h-3 peer-checked:after:bg-white 
+                     peer-checked:after:rounded-full peer-checked:after:absolute 
+                     peer-checked:after:top-1/2 peer-checked:after:left-1/2 
+                     peer-checked:after:-translate-x-1/2 peer-checked:after:-translate-y-1/2 
+                     relative">
+                            </span>
+                            <span className="text-gray-700 group-hover:text-blue-500 transition-colors">
+                                Có biến thể
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
 

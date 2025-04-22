@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { register } from '../../api/auth/registerAPI';
-import { Notification } from '../../component/message/message';
 import { validateField } from '../../utils/validateFiled';
 import { ClipLoader } from "react-spinners";
+import Notification from '../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -79,12 +80,17 @@ const RegisterPage = () => {
 
     return (
         <div>
-            <Notification
-                type={notification.type}
-                message={notification.message}
-                isOpen={notification.isOpen}
-                onClose={closeNotification}
-            />
+            {notification.isOpen && (
+                <Notification
+                    type={notification.type}
+                    message={notification.message}
+                    onClose={closeNotification}
+                />
+            )}
+            <Helmet>
+                <title>Đăng ký</title>
+            </Helmet>
+
 
             <div className="min-h-screen  bg-gradient-to-br  from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
                 {/* Các phần tử trang trí */}

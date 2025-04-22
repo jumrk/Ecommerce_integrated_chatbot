@@ -3,11 +3,10 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     FaTachometerAlt, FaBox, FaPlus,
     FaFolder, FaShoppingBag, FaUser, FaBan, FaTicketAlt,
-    FaNewspaper, FaStar, FaComment, FaCog, FaCreditCard, FaBoxOpen, FaKey, FaSignOutAlt,
+    FaNewspaper, FaStar, FaComment, FaCog, FaBoxOpen, FaKey, FaSignOutAlt,
     FaHistory,
-    FaRobot, FaClipboardList
+    FaRobot,
 } from 'react-icons/fa';
-import { TbCreditCardRefund } from "react-icons/tb";
 import { IoArrowUndoOutline, IoChatbox, IoChatboxOutline } from "react-icons/io5";
 import './Sidebar.css';
 
@@ -140,7 +139,6 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
             subItems: [
                 { title: 'Danh sách sản phẩm', icon: <FaBox />, route: '/admin/products/list-product' },
                 { title: 'Thêm sản phẩm mới', icon: <FaPlus />, route: '/admin/products/add-product' },
-                { title: 'Đánh giá sản phẩm', icon: <FaStar />, route: '/admin/products/reviews' },
             ],
         },
         {
@@ -171,8 +169,7 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
             title: 'Quản lý tin nhắn',
             icon: <IoChatbox />,
             subItems: [
-                { title: 'Hộp thư khách hàng', icon: <IoChatboxOutline />, route: '/admin/messages/list-message' },
-                { title: 'Hệ thống Chatbot', icon: <FaRobot />, route: '/admin/messages/chatbot' },
+                { title: 'Hộp thư khách hàng', icon: <IoChatboxOutline />, route: '/admin/messages/list-message' }
             ],
         },
         {
@@ -189,37 +186,15 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
             subItems: [
                 { title: 'Danh sách bài viết', icon: <FaNewspaper />, route: '/admin/blogs/list-blog' },
                 { title: 'Thêm bài viết mới', icon: <FaPlus />, route: '/admin/blogs/add-blog' },
-                { title: 'Bình luận bài viết', icon: <FaComment />, route: '/admin/blogs/comments' },
                 { title: 'Danh mục bài viết', icon: <FaFolder />, route: '/admin/blogs/categories' },
-            ],
-        },
-        {
-            title: 'Quản lý phương thức thanh toán',
-            icon: <FaCreditCard />,
-            subItems: [
-                { title: 'Tổng quan', icon: <FaTachometerAlt />, route: '/admin/payment/dashboard' },
-                { title: 'Danh sách giao dịch', icon: <FaClipboardList />, route: '/admin/payment/transaction-list' },
-                { title: 'Hoàn tiền', icon: <TbCreditCardRefund />, route: '/admin/payment/refund' },
-                { title: 'Cấu hình phương thức thanh toán', icon: <FaCog />, route: '/admin/payment/config' },
-                { title: 'Nhật kí hoạt động', icon: <FaHistory />, route: '/admin/payment/activity-log' },
             ],
         },
         {
             title: 'Quản lý vận chuyển',
             icon: <FaBoxOpen />,
             subItems: [
-                { title: 'Danh sách vận chuyển', icon: <FaClipboardList />, route: '/admin/shipping/list-shipping' },
                 { title: 'Quản lý shipper', icon: <FaUser />, route: '/admin/shipping/shipper-management' },
                 { title: 'Cấu hình vận chuyển', icon: <FaCog />, route: '/admin/shipping/shipping-config' },
-                { title: 'Lịch sử vận chuyển', icon: <FaHistory />, route: '/admin/shipping/shipping-history' },
-            ],
-        },
-        {
-            title: 'Tài khoản & Đăng xuất',
-            icon: <FaKey />,
-            subItems: [
-                { title: 'Đổi mật khẩu', icon: <FaKey /> },
-                { title: 'Đăng xuất', icon: <FaSignOutAlt /> },
             ],
         },
     ];
@@ -261,10 +236,10 @@ const SidebarAdmin = ({ isCollapsed, toggleSidebar, isMobile }) => {
                     <div>
                         <div className="text-gray-400 text-xs font-semibold mb-4 px-3">
                             QUẢN LÝ
-                                    </div>
+                        </div>
                         <div className="space-y-1">
                             {navItems.slice(1, 11).map((item, index) => renderMenuItem(item, index, 1))}
-                            </div>
+                        </div>
                     </div>
                 </div>
             </nav>

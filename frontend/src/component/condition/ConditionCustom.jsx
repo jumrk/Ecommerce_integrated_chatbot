@@ -9,7 +9,15 @@ const STATUS_COLORS = {
 
 const StatusBadge = ({ type = "info", text }) => {
     return (
-        <div className={`flex justify-center items-center px-2 py-1 rounded-full font-medium ${STATUS_COLORS[type]}`}>
+        <div
+            className={`flex justify-center items-center 
+              px-2 py-1 sm:px-3 sm:py-1.5 
+              rounded-full font-medium 
+              max-w-full w-fit 
+              text-xs sm:text-sm 
+              whitespace-nowrap 
+              ${STATUS_COLORS[type]}`}
+        >
             {text}
         </div>
     );

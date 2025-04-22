@@ -1,19 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../../../component/card/CardProduct';
-import products from '../../../data/Product';
-const DiscountedProductsPage = () => {
-    const [visibleProducts, setVisibleProducts] = useState(8);
+import { getProductSale } from '../../../api/product/productService';
+import Loading from '../../../component/loading/loading';
+import { Helmet } from 'react-helmet';
 
-    const discountedProducts = products.filter((product) => product.discount);
+const DiscountedProductsPage = () => {
+    const [products, setProducts] = useState([]);
+    const [visibleProducts, setVisibleProducts] = useState(8);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDiscountedProducts = async () => {
+            try {
+                const data = await getProductSale();
+                const products = data.filter(product => product.category.status)
+                setProducts(products);
+            } catch (error) {
+                console.error("Lỗi khi lấy sản phẩm giảm giá:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDiscountedProducts();
+    }, []);
+
+    const discountedProducts = products.filter((product) => product.discount > 0);
+    const currentProducts = discountedProducts.slice(0, visibleProducts);
 
     const loadMoreProducts = () => {
         setVisibleProducts((prev) => prev + 8);
     };
 
-    const currentProducts = discountedProducts.slice(0, visibleProducts);
+    if (loading) {
+        return (
+            <Loading />
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <Helmet>
+                <title>Đang giảm giá</title>
+            </Helmet>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-gray-800">SẢN PHẨM GIẢM GIÁ</h1>
@@ -23,8 +52,13 @@ const DiscountedProductsPage = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {currentProducts.map((product) => (
                         <ProductCard
-                            key={product.id}
+                            key={product._id} // Sử dụng _id thay vì id
                             {...product}
+                            discountedPrice={
+                                product.discount
+                                    ? product.price * (1 - product.discount / 100)
+                                    : product.price
+                            }
                         />
                     ))}
                 </div>

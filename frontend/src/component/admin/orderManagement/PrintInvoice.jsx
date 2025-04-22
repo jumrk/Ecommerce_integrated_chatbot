@@ -4,61 +4,75 @@ import { FiPrinter } from 'react-icons/fi';
 const PrintInvoice = ({ order }) => {
     const handlePrint = () => {
         const printContent = `
-            <div style="padding: 20px;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h1 style="font-size: 24px; margin-bottom: 10px;">HÓA ĐƠN BÁN HÀNG</h1>
-                    <p>Mã đơn hàng: ${order.id}</p>
-                    <p>Ngày đặt: ${new Date(order.orderDate).toLocaleDateString('vi-VN')}</p>
+            <div style="font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2d3748; padding-bottom: 20px;">
+                    <h1 style="font-size: 28px; color: #2d3748; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">Hóa Đơn Bán Hàng</h1>
+                    <p style="color: #4a5568; margin: 5px 0;">Mã đơn hàng: <strong>${order.orderCode}</strong></p>
+                    <p style="color: #4a5568; margin: 5px 0;">Ngày đặt: ${new Date(order.createdAt).toLocaleDateString('vi-VN')}</p>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h2 style="font-size: 18px; margin-bottom: 10px;">Thông tin khách hàng</h2>
-                    <p>Họ tên: ${order.customer.name}</p>
-                    <p>Số điện thoại: ${order.customer.phone}</p>
-                    <p>Địa chỉ: ${order.shippingAddress.street}, ${order.shippingAddress.ward}, ${order.shippingAddress.district}, ${order.shippingAddress.city}</p>
+                <div style="display: grid; grid-template-columns: ${order.shipper ? '1fr 1fr' : '1fr'}; gap: 30px; margin-bottom: 30px;">
+                    <div>
+                        <h2 style="font-size: 18px; color: #2d3748; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Thông tin khách hàng</h2>
+                        <p style="margin: 8px 0; color: #4a5568;">Họ tên: <strong>${order.addressId.receiver}</strong></p>
+                        <p style="margin: 8px 0; color: #4a5568;">Số điện thoại: <strong>${order.addressId.phone}</strong></p>
+                        <p style="margin: 8px 0; color: #4a5568;">Địa chỉ: ${order.addressId.address}, ${order.addressId.ward}, ${order.addressId.district}, ${order.addressId.province}</p>
+                    </div>
+
+                    ${order.shipper ? `
+                    <div>
+                        <h2 style="font-size: 18px; color: #2d3748; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Thông tin người giao hàng</h2>
+                        <p style="margin: 8px 0; color: #4a5568;">Tên: <strong>${order.shipper.name}</strong></p>
+                        <p style="margin: 8px 0; color: #4a5568;">Số điện thoại: <strong>${order.shipper.phone}</strong></p>
+                    </div>
+                    ` : `
+                    <div>
+                        <h2 style="font-size: 18px; color: #2d3748; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Phương thức vận chuyển</h2>
+                        <p style="margin: 8px 0; color: #4a5568;">${order.shippingMethod}</p>
+                    </div>
+                    `}
                 </div>
 
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; background: #fff;">
                     <thead>
-                        <tr style="background-color: #f3f4f6;">
-                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sản phẩm</th>
-                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Đơn giá</th>
-                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Số lượng</th>
-                            <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Thành tiền</th>
+                        <tr style="background-color: #2d3748; color: white;">
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Sản phẩm</th>
+                            <th style="padding: 12px; text-align: right; font-weight: 600;">Đơn giá</th>
+                            <th style="padding: 12px; text-align: right; font-weight: 600;">Số lượng</th>
+                            <th style="padding: 12px; text-align: right; font-weight: 600;">Thành tiền</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${order.items.map(item => `
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">${item.name}<br><span style="font-size: 12px; color: #666;">${item.variant}</span></td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${item.quantity}</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price * item.quantity)}</td>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; color: #4a5568;">
+                                    ${item.productId.name}
+                                    <br><span style="font-size: 12px; color: #718096;">${item.size} / ${item.color}</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; color: #4a5568;">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</td>
+                                <td style="padding: 12px; text-align: right; color: #4a5568;">${item.quantity}</td>
+                                <td style="padding: 12px; text-align: right; color: #2d3748; font-weight: 600;">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price * item.quantity)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
 
-                <div style="margin-left: auto; width: 300px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <div style="margin-left: auto; width: 320px; background: #f7fafc; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #4a5568;">
                         <span>Tạm tính:</span>
                         <span>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.subtotal)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #4a5568;">
                         <span>Phí vận chuyển:</span>
                         <span>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.shippingFee)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span>Giảm giá:</span>
-                        <span>-${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.discount)}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 600; margin-top: 15px; padding-top: 15px; border-top: 2px solid #2d3748; color: #2d3748; font-size: 18px;">
                         <span>Tổng cộng:</span>
                         <span>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.total)}</span>
                     </div>
                 </div>
 
-                <div style="margin-top: 40px; text-align: center;">
+                <div style="margin-top: 40px; text-align: center; color: #718096; font-style: italic;">
                     <p>Cảm ơn quý khách đã mua hàng!</p>
                 </div>
             </div>
@@ -68,7 +82,7 @@ const PrintInvoice = ({ order }) => {
         printWindow.document.write(`
             <html>
                 <head>
-                    <title>In hóa đơn - ${order.id}</title>
+                    <title>In hóa đơn - ${order.orderCode}</title>
                 </head>
                 <body>
                     ${printContent}
@@ -89,7 +103,7 @@ const PrintInvoice = ({ order }) => {
     return (
         <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
         >
             <FiPrinter />
             In hóa đơn

@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
-import Pagination from '../../../component/pagination/Pagination';
+import { FiSearch, FiFilter } from 'react-icons/fi';
 import { formatDate } from '../../../utils/format/formatDate';
-import ConfirmDialog from '../../../component/common/ConfirmDialog';
 import { toast } from 'react-toastify';
-import EditBlogModal from '../../../component/admin/blogManagement/EditBlogModal';
-import ButtonEdit from '../../../component/button/ButtonEdit';
+import { deleteBlog, getBlogs } from '../../../api/blog/blogSevice';
+import Loading from '../../../component/loading/loading';
+import Pagination from '../../../component/pagination/Pagination';
+import ConfirmDialog from '../../../component/common/ConfirmDialog';
+import Notification from '../../../component/notification/Notification';
 import ButtonDelete from '../../../component/button/ButtonDelete';
 import StatusBadge from '../../../component/condition/ConditionCustom';
+import { getCategories } from '../../../api/blog/categoryBlogSevice';
+import { Helmet } from 'react-helmet';
+
 
 const BlogListPage = () => {
     const navigate = useNavigate();
@@ -18,35 +21,13 @@ const BlogListPage = () => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [selectedBlog, setSelectedBlog] = useState(null);
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [searchTerm, setSearchTerm] = useState('');
     const itemsPerPage = 10;
-    const [showEditModal, setShowEditModal] = useState(false);
-
-    // Mock data - thay thế bằng API call thực tế
-    const [blogs, setBlogs] = useState([
-        {
-            _id: "641f1a2b9f1b2c3d4e5f0a01",
-            title: "Top 10 Xu Hướng Thời Trang 2025",
-            content: "Năm 2025 đánh dấu sự bùng nổ của thời trang bền vững...",
-            images: ["https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg"],
-            category: "Xu hướng",
-            author: "Nguyễn Minh Anh",
-            createdAt: "2025-03-15T00:00:00Z",
-            updatedAt: "2025-03-15T00:00:00Z",
-            status: "pending" // pending hoặc approved
-        },
-        {
-            _id: "641f1a22b9f1b2c3d4e5f0a02",
-            title: "Top 10adsadsa Xu Hướng Thời Trang 2025",
-            content: "Năm 202ádsdsadsadsa5 đánh dấu sự bùng nổ của thời trang bền vững...",
-            images: ["https://i.pinimg.com/736x/ea/5e/09/ea5e096ba271673250b76e2ba6b20c04.jpg"],
-            category: "Xu hướng",
-            date: "2025-03-15",
-            author: "Nguyễn Minh Anh",
-            createdAt: "2025-03-15T00:00:00Z",
-            updatedAt: "2025-03-15T00:00:00Z"
-        },
-        // Thêm dữ liệu mẫu khác
-    ]);
+    const [blogs, setBlogs] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [sortOrder, setSortOrder] = useState('newest');
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -61,12 +42,14 @@ const BlogListPage = () => {
     const confirmDelete = async () => {
         try {
             setLoading(true);
-            // API call để xóa bài viết
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setBlogs(blogs.filter(b => b._id !== selectedBlog._id));
-            toast.success('Xóa bài viết thành công');
+            // API call to delete the blog
+            const response = await deleteBlog(selectedBlog._id)
+            if (response.success) {
+                setBlogs(blogs.filter(b => b._id !== selectedBlog._id));
+            }
+            setNotification({ message: response.message, type: response.success ? 'success' : 'error' });
         } catch (error) {
-            toast.error('Có lỗi xảy ra khi xóa bài viết');
+            setNotification({ message: 'Có lỗi xảy ra khi xóa bài viết', type: 'error' });
         } finally {
             setLoading(false);
             setShowConfirmDelete(false);
@@ -74,50 +57,69 @@ const BlogListPage = () => {
         }
     };
 
-    const handleEdit = (blog) => {
-        console.log('Blog data being passed:', blog);
-        setSelectedBlog(blog);
-        setShowEditModal(true);
-    };
-
-    const handleEditModalClose = (wasUpdated) => {
-        if (wasUpdated) {
-            // Refresh lại danh sách blog nếu có cập nhật
-            fetchBlogs(); // Hàm fetch lại danh sách blog
-        }
-        setShowEditModal(false);
-        setSelectedBlog(null);
-    };
-
-    // Tính toán blogs cho trang hiện tại
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentBlogs = blogs.slice(indexOfFirstItem, indexOfLastItem);
-
-    // Thêm hàm fetchBlogs
+    // Fetch blogs and categories
     const fetchBlogs = async () => {
         try {
             setLoading(true);
-            // Giả lập API call - sau này thay bằng API thật
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            // Tạm thời dùng lại dữ liệu mock
-            // Sau này sẽ fetch từ API thật
-            setLoading(false);
+            const response = await getBlogs();
+            setBlogs(response);
         } catch (error) {
             toast.error('Có lỗi xảy ra khi tải danh sách bài viết');
+        } finally {
             setLoading(false);
         }
     };
 
-    // Thêm useEffect để fetch dữ liệu khi component mount
+    const fetchCategories = async () => {
+        try {
+            const response = await getCategories();
+            setCategories(response);
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi tải danh sách danh mục');
+        }
+    };
+
+    // Fetch data when component mounts
     useEffect(() => {
         fetchBlogs();
+        fetchCategories();
     }, []);
 
-    if (loading) return <LoadingSpinner />;
+    if (loading) return <Loading />;
+
+    // Filter blogs based on search term and selected category
+    const filteredBlogs = blogs.filter(blog => {
+        const matchesTitle = blog.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory ? blog.category._id === selectedCategory : true;
+        return matchesTitle && matchesCategory;
+    });
+
+    // Sort blogs based on selected order
+    const sortedBlogs = [...filteredBlogs].sort((a, b) => {
+        if (sortOrder === 'newest') {
+            return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
+        } else {
+            return new Date(a.createdAt) - new Date(b.createdAt); // Oldest first
+        }
+    });
+
+    // Calculate blogs for the current page
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentBlogs = sortedBlogs.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Danh sách blog</title>
+            </Helmet>
+            {notification.message && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification({ message: '', type: '' })}
+                />
+            )}
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -133,6 +135,8 @@ const BlogListPage = () => {
                                     type="text"
                                     placeholder="Tìm kiếm bài viết..."
                                     className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             </div>
@@ -151,27 +155,28 @@ const BlogListPage = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Danh mục
                                 </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
                                     <option value="">Tất cả</option>
-                                    <option value="Xu hướng">Xu hướng</option>
-                                    <option value="Thời trang">Thời trang</option>
-                                    <option value="Lifestyle">Lifestyle</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Tác giả
-                                </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Tất cả</option>
-                                    <option value="Nguyễn Minh Anh">Nguyễn Minh Anh</option>
+                                    {categories.map(category => (
+                                        <option key={category._id} value={category._id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Sắp xếp theo
                                 </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                    className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
                                     <option value="newest">Mới nhất</option>
                                     <option value="oldest">Cũ nhất</option>
                                 </select>
@@ -192,9 +197,6 @@ const BlogListPage = () => {
                                     Danh mục
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tác giả
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Ngày đăng
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -211,7 +213,7 @@ const BlogListPage = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
                                             <img
-                                                src={blog.images[0]}
+                                                src={import.meta.env.VITE_API_URL + blog.images[0]}
                                                 alt=""
                                                 className="w-16 h-16 object-cover rounded-lg mr-4"
                                             />
@@ -220,33 +222,25 @@ const BlogListPage = () => {
                                                     onClick={() => navigate(`/admin/blogs/blog-detail/${blog._id}`)}>
                                                     {blog.title}
                                                 </div>
-                                                <div className="text-sm text-gray-500 line-clamp-2">
-                                                    {blog.content}
-                                                </div>
+                                                <div className="text-sm text-gray-500 line-clamp-2" dangerouslySetInnerHTML={{ __html: blog.content }} />
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {blog.category}
+                                            {typeof blog.category === 'string' ? blog.category : blog.category.name}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {blog.author}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {formatDate(blog.createdAt)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <StatusBadge
-                                            type={blog.status === 'approved' ? 'success' : 'warning'}
-                                            text={blog.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                                            type={blog.status === 'Đã duyệt' ? 'success' : blog.status === 'Chờ duyệt' ? 'warning' : 'danger'}
+                                            text={blog.status}
                                         />
                                     </td>
-                                    <td className="flex items-center gap-2 mt-8 justify-end whitespace-nowrap text-right text-sm font-medium">
-                                        <ButtonEdit
-                                            onClick={() => handleEdit(blog)}
-                                        />
+                                    <td className="flex items-center mt-8 justify-center whitespace-nowrap text-right text-sm font-medium">
                                         <ButtonDelete
                                             onClick={() => handleDelete(blog)}
                                         />
@@ -274,18 +268,7 @@ const BlogListPage = () => {
                 onClose={() => setShowConfirmDelete(false)}
                 onConfirm={confirmDelete}
             />
-
-            <EditBlogModal
-                isOpen={showEditModal}
-                onClose={(wasUpdated) => {
-                    setShowEditModal(false);
-                    if (wasUpdated) {
-                        fetchBlogs(); // Refresh lại danh sách nếu có cập nhật
-                    }
-                }}
-                blog={selectedBlog}
-            />
-        </div >
+        </div>
     );
 };
 

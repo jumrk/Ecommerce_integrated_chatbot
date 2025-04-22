@@ -2,19 +2,34 @@ const Blog = require('../../model/Blog');
 
 const getBlogs = async (req, res) => {
     try {
-        const blogs = await Blog.find().populate('category');
+        const blogs = await Blog.find()
+            .sort({ createdAt: -1 })
+            .populate('category')
+            .populate('userId', 'fullName');
         res.json(blogs);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+const getBlogsUser = async (req, res) => {
+    const userId = req.user.userId;
+    try {
+        const blogs = await Blog.find({ userId })
+            .sort({ createdAt: -1 })
+            .populate('category')
+            .populate('userId', 'fullName');
+        res.json(blogs);
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
 const getBlogById = async (req, res) => {
     const id = req.params.id;
     try {
         if (!id) {
             res.status(404).json({ success: false, message: "Id không tồn tại❗" })
         }
-        const blog = await Blog.findById(id).populate('category');
+        const blog = await Blog.findById(id).populate('category').populate('userId', 'fullName');
         if (!blog) {
             res.status(404).json({ success: false, message: "Bài viết không tồn tại❗" })
         }
@@ -24,10 +39,14 @@ const getBlogById = async (req, res) => {
     }
 }
 const addBlog = async (req, res) => {
-    const { title, content, images, category, author } = req.body;
+    const { title, content, category } = req.body;
+    const userId = req.user.userId;
     try {
-        if (!title || !content || !images || !category || !author) {
-            res.status(404).json({ success: false, message: "Vui lòng nhập dữ liệu❗" })
+        if (!title || !content || !category) {
+            return res.status(404).json({ success: false, message: "Vui lòng nhập dữ liệu❗" });
+        }
+        if (!userId) {
+            return res.status(404).json({ success: false, message: "Người dùng không tồn tại❗" });
         }
         const isTitle = Blog.findOne({ title });
         if (!isTitle) {
@@ -38,15 +57,15 @@ const addBlog = async (req, res) => {
         const imagePaths = req.files ? req.files.map(file => `/images/blog/${file.filename}`) : [];
         const newBlog = new Blog({
             title,
+            userId,
             content,
             images: imagePaths,
             category,
-            author,
         });
         await newBlog.save();
-        res.status(201).json({ success: true, message: "Thêm bài viết thành công ✅", data: newBlog });
+        return res.status(201).json({ success: true, message: "Thêm bài viết thành công ✅", data: newBlog });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -136,4 +155,13 @@ const deleteBlog = async (req, res) => {
     }
 };
 
-module.exports = { addBlog, getBlogById, deleteBlog, updateBlog, getBlogs, browse_Article, rejectArticle };
+const getApprovedBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ status: "Đã duyệt" }).populate('category').populate('userId', "fullName");
+        res.json(blogs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { addBlog, getBlogsUser, getBlogById, deleteBlog, updateBlog, getBlogs, browse_Article, rejectArticle, getApprovedBlogs };

@@ -33,6 +33,7 @@ export const useProductVariants = () => {
     };
 
     const handleAddSize = (newSize) => {
+        console.log('Thêm size:', newSize); // Log để kiểm tra
         if (newSize && !sizes.includes(newSize)) {
             setSizes([...sizes, newSize]);
         }
@@ -51,10 +52,18 @@ export const useProductVariants = () => {
     };
 
     const updateStock = (size, color, value) => {
-        setStock(prev => ({
-            ...prev,
-            [`${size}-${color}`]: parseInt(value) || 0
-        }));
+        setStock(prev => {
+            if (color === null) { // Trường hợp simple product
+                return {
+                    ...prev,
+                    [size]: parseInt(value) || 0
+                };
+            }
+            return {
+                ...prev,
+                [`${size}-${color}`]: parseInt(value) || 0
+            };
+        });
     };
 
     const getColorNameFromHex = (hex) => {

@@ -10,7 +10,7 @@ const getUsers = async (req, res) => {
     }
 }
 
-const getUserById = async (req, res) => {
+const getUserInfor = async (req, res) => {
     const userId = req.user.userId;
     try {
         const user = await User.findById(userId);
@@ -20,7 +20,15 @@ const getUserById = async (req, res) => {
     }
 }
 
-
+const getUserById = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user' });
+    }
+}
 const updateUser = async (req, res) => {
     const userId = req.user.userId;
 
@@ -59,22 +67,37 @@ const updateUser = async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi máy chủ ❌', error: error.message });
     }
 };
-const updateUserById = async (req, res) => {
-    const id = req.user.userId;
+const updateUserRole = async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
     try {
-        const isRole = req.body.role;
-        if (isRole !== "Customer" && isRole !== "Admin") {
-            return res.status(403).json({ success: false, message: 'Dữ liệu không hợp lệ ❌' });
-        }
-        const user = await User.findByIdAndUpdate(id, req.body, { new: true });
+        const user = await User.findByIdAndUpdate(
+            id,
+            { role },
+            { new: true }
+        );
+
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Cập nhật tài khoản thất bại ❌' });
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy người dùng ❌'
+            });
         }
-        res.status(200).json({ success: true, message: 'Cập nhật tài khoản thành công ✅', user });
+
+        res.status(200).json({
+            success: true,
+            message: 'Cập nhật vai trò thành công ✅',
+            user
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Cập nhật tài khoản thất bại ❌' });
+        res.status(500).json({
+            success: false,
+            message: 'Cập nhật vai trò thất bại ❌',
+            error: error.message
+        });
     }
-}
+};
 
 const accountLocks = async (req, res) => {
     const id = req.params.id;
@@ -111,7 +134,7 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { getUsers, getUserById, updateUser, deleteUser, updateUserById, accountLocks, openingAccount };
+module.exports = { getUsers, getUserInfor, getUserById, updateUser, deleteUser, updateUserRole, accountLocks, openingAccount };
 
 
 

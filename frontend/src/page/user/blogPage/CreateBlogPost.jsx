@@ -1,222 +1,179 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaImage, FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
-import { SlideGridWhenVisible } from '../../../component/animation/SlideGridWhenVisible';
-import { ScaleUpWhenVisible } from '../../../component/animation/ScaleUpWhenVisible';
-import { FlipInWhenVisible } from '../../../component/animation/FlipInWhenVisible';
-import { RotateInWhenVisible } from '../../../component/animation/RotateInWhenVisible';
-
-const CreateBlogPost = () => {
+import { FiArrowLeft } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import ImageUpload from '../../../component/common/ImageUpload';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { addBlog } from '../../../api/blog/blogSevice';
+import { getCategories } from '../../../api/blog/categoryBlogSevice';
+import Notification from '../../../component/notification/Notification';
+import Loading from '../../../component/loading/loading'
+import { Helmet } from 'react-helmet';
+const AddBlogPage = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        category: 'Xu hướng',
         images: [],
-        date: new Date().toLocaleDateString(),
-        author: 'Khách hàng',
+        category: '',
     });
-    const [error, setError] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const [notification, setNotification] = useState({ message: '', type: '' });
 
-    const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === 'images') {
-            const newImages = Array.from(files);
-            setFormData((prev) => ({
-                ...prev,
-                images: [...prev.images, ...newImages].slice(0, 5),
-            }));
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
-        }
-    };
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setLoading(true);
+            try {
+                const response = await getCategories();
+                setCategories(response);
+            } catch (error) {
+                toast.error('Failed to fetch categories');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCategories();
+    }, []);
 
-    const removeImage = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            images: prev.images.filter((_, i) => i !== index),
-        }));
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.title.trim() || !formData.content.trim() || formData.images.length === 0) {
-            setError('Vui lòng điền đầy đủ tiêu đề, nội dung và tải lên ít nhất một hình ảnh.');
+
+        if (!formData.title || !formData.content || !formData.category || formData.images.length === 0) {
+            setNotification({ message: 'Vui lòng điền đầy đủ thông tin bắt buộc', type: 'error' });
             return;
         }
 
-        setIsSubmitting(true);
-        setError('');
+        try {
+            setLoading(true);
+            const formDataToSend = new FormData();
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('content', formData.content);
+            formDataToSend.append('category', formData.category);
 
-
-        setTimeout(() => {
-            console.log('Bài viết đã được gửi để xét duyệt:', {
-                ...formData,
-                status: 'Chờ xét duyệt',
+            formData.images.forEach(image => {
+                formDataToSend.append('images', image.file);
             });
 
+            await addBlog(formDataToSend);
+            setNotification({ message: 'Thêm bài viết thành công', type: 'success' });
             setTimeout(() => {
-                setFormData({
-                    title: '',
-                    content: '',
-                    category: 'Xu hướng',
-                    images: [],
-                    date: new Date().toLocaleDateString(),
-                    author: 'Khách hàng',
-                });
-                setIsSubmitting(false);
                 navigate('/directory/fashion-blog');
             }, 2000);
-        }, 1000);
+        } catch (error) {
+            setNotification({ message: 'Có lỗi xảy ra', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleBack = () => {
-        navigate('/directory/fashion-blog');
-    };
+    if (loading) {
+        return <Loading />;
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <SlideGridWhenVisible direction="left">
+        <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Đăng bài</title>
+            </Helmet>
+            {notification.message && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification({ message: '', type: '' })}
+                />
+            )}
+            <div className="max-w-4xl mx-auto">
+                <div className="flex items-center mb-6">
                     <button
-                        onClick={handleBack}
-                        className="mb-8 flex items-center text-indigo-600 font-semibold hover:text-indigo-800 transition-colors duration-300"
+                        onClick={() => navigate(-1)}
+                        className="mr-4 p-2 hover:bg-gray-100 rounded-full"
                     >
-                        <FaArrowLeft className="mr-2" size={16} /> Quay lại
+                        <FiArrowLeft className="w-6 h-6" />
                     </button>
-                </SlideGridWhenVisible>
+                    <h1 className="text-2xl font-bold text-gray-800">
+                        Thêm bài viết mới
+                    </h1>
+                </div>
 
-                <FlipInWhenVisible>
-                    <h1 className="text-4xl font-bold text-gray-800 mb-6 drop-shadow-md">ĐĂNG BÀI BLOG</h1>
-                    <p className="text-gray-600 mb-8">Tạo bài viết mới và chờ xét duyệt từ admin.</p>
-                </FlipInWhenVisible>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="bg-white rounded-lg shadow p-6">
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Tiêu đề *
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Nhập tiêu đề bài viết"
+                            />
+                        </div>
 
-                <ScaleUpWhenVisible>
-                    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6">
-                        {error && (
-                            <div className="mb-4 text-red-500 text-sm flex items-center">
-                                <FaTimes className="mr-2" /> {error}
-                            </div>
-                        )}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Hình ảnh
+                            </label>
+                            <ImageUpload
+                                images={formData.images}
+                                onChange={(images) => setFormData({ ...formData, images })}
+                                multiple={true}
+                            />
+                        </div>
 
-                        <SlideGridWhenVisible direction="right">
-                            <div className="mb-6">
-                                <label className="block text-gray-700 font-semibold mb-2">Tiêu đề</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
-                                    placeholder="Nhập tiêu đề bài viết..."
-                                />
-                            </div>
-                        </SlideGridWhenVisible>
-
-                        <SlideGridWhenVisible direction="left">
-                            <div className="mb-6">
-                                <label className="block text-gray-700 font-semibold mb-2">Nội dung</label>
-                                <textarea
-                                    name="content"
-                                    value={formData.content}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 h-40 resize-none"
-                                    placeholder="Viết nội dung bài viết của bạn..."
-                                />
-                            </div>
-                        </SlideGridWhenVisible>
-
-                        <RotateInWhenVisible>
-                            <div className="mb-6">
-                                <label className="block text-gray-700 font-semibold mb-2">Danh mục</label>
+                        <div className="grid grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Danh mục *
+                                </label>
                                 <select
-                                    name="category"
                                     value={formData.category}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {['Xu hướng', 'Mẹo phối đồ', 'Review', 'Lookbook'].map((cat) => (
-                                        <option key={cat} value={cat}>{cat}</option>
+                                    <option value="">Chọn danh mục</option>
+                                    {categories.map(category => (
+                                        <option key={category._id} value={category._id}>
+                                            {category.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
-                        </RotateInWhenVisible>
-
-                        <FlipInWhenVisible>
-                            <div className="mb-6">
-                                <label className="block text-gray-700 font-semibold mb-2">Hình ảnh</label>
-                                <label className="w-full flex items-center px-4 py-3 border border-gray-300 rounded-md bg-white cursor-pointer hover:bg-gray-50 transition-all duration-300">
-                                    <FaImage className="mr-2 text-gray-500" size={20} />
-                                    <span className="text-gray-700">Chọn nhiều hình ảnh (tối đa 5 ảnh)...</span>
-                                    <input
-                                        type="file"
-                                        name="images"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={handleChange}
-                                        className="hidden"
-                                    />
-                                </label>
-
-                                {formData.images.length > 0 && (
-                                    <SlideGridWhenVisible direction="up" stagger={0.1}>
-                                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                            {formData.images.map((image, index) => (
-                                                <div key={index} className="relative">
-                                                    <img
-                                                        src={URL.createObjectURL(image)}
-                                                        alt={`Image ${index + 1}`}
-                                                        className="w-full h-32 object-cover rounded-md shadow-md transition-all duration-300 hover:brightness-90"
-                                                    />
-                                                    <button
-                                                        onClick={() => removeImage(index)}
-                                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-all duration-300"
-                                                    >
-                                                        <FaTrash size={14} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </SlideGridWhenVisible>
-                                )}
-                                {formData.images.length >= 5 && (
-                                    <p className="mt-2 text-sm text-gray-500">Đã đạt tối đa 5 ảnh. Xóa ảnh để thêm mới.</p>
-                                )}
-                            </div>
-                        </FlipInWhenVisible>
-
-                        <ScaleUpWhenVisible>
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className={`w-full py-3 rounded-md font-semibold transition-all duration-300 flex items-center justify-center ${isSubmitting
-                                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg'
-                                    }`}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <FaCheck className="mr-2 animate-spin" size={16} /> Đang gửi...
-                                    </>
-                                ) : (
-                                    'Gửi bài viết'
-                                )}
-                            </button>
-                        </ScaleUpWhenVisible>
-                    </form>
-                </ScaleUpWhenVisible>
-
-                {isSubmitting && (
-                    <RotateInWhenVisible>
-                        <div className="mt-4 text-center text-gray-600">
-                            Bài viết của bạn đã được gửi và đang chờ xét duyệt từ admin. Vui lòng quay lại sau để kiểm tra trạng thái.
                         </div>
-                    </RotateInWhenVisible>
-                )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Nội dung *
+                            </label>
+                            <ReactQuill
+                                value={formData.content}
+                                onChange={(content) => setFormData({ ...formData, content })}
+                                className="h-64 mb-12"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-4">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/admin/blogs')}
+                            className="px-6 py-2 border rounded-lg hover:bg-gray-50"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Đăng bài
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
 };
 
-export default CreateBlogPost;
+export default AddBlogPage;

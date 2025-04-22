@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
+import { getCategories } from '../../api/category/categoryProduct'; // Import API để lấy danh mục
 
-const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
+const ProductFilterSidebar = ({ onFilterChange, initialCategory = '', availableColors = [] }) => {
     const [openSections, setOpenSections] = useState({
-        category: initialCategory,
+        category: initialCategory !== '',
         price: true,
         color: true,
         size: true,
@@ -11,6 +12,7 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
 
     const [expandedCategories, setExpandedCategories] = useState(false);
     const [expandedSizes, setExpandedSizes] = useState(false);
+    const [categories, setCategories] = useState([]); // State để lưu trữ danh mục từ API
 
     const toggleSection = (section) => {
         setOpenSections((prev) => ({
@@ -26,6 +28,23 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
         size: [],
     });
 
+    useEffect(() => {
+        setFilters(prev => ({ ...prev, category: initialCategory }));
+    }, [initialCategory]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await getCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error("Lỗi khi lấy danh mục:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     const colorClasses = {
         green: 'bg-green-400',
         red: 'bg-red-400',
@@ -39,37 +58,30 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
 
     const handleFilterChange = (type, value) => {
         setFilters((prev) => {
-            let newFilters;
+            let newFilters = { ...prev }; // Sao chép các bộ lọc hiện có
             switch (type) {
                 case 'category':
-                    newFilters = { ...prev, category: value === prev.category ? '' : value };
+                    newFilters.category = value === prev.category ? '' : value;
                     break;
                 case 'price':
-                    newFilters = { ...prev, price: value };
+                    newFilters.price = value;
                     break;
                 case 'color':
                     const isSelected = prev.color.includes(value);
-                    newFilters = {
-                        ...prev,
-                        color: isSelected ? prev.color.filter((c) => c !== value) : [...prev.color, value],
-                    };
+                    newFilters.color = isSelected ? prev.color.filter((c) => c !== value) : [...prev.color, value];
                     break;
                 case 'size':
                     const isSizeSelected = prev.size.includes(value);
-                    newFilters = {
-                        ...prev,
-                        size: isSizeSelected ? prev.size.filter((s) => s !== value) : [...prev.size, value],
-                    };
+                    newFilters.size = isSizeSelected ? prev.size.filter((s) => s !== value) : [...prev.size, value];
                     break;
                 default:
-                    newFilters = prev;
+                    return prev;
             }
             onFilterChange(newFilters);
             return newFilters;
         });
     };
 
-    const categories = ['T-shirt', 'Shorts', 'Shirts', 'Hoodie', 'Quần Jeans', 'Quần dài', 'Váy', 'Áo khoác'];
     const sizes = ['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
 
     return (
@@ -87,14 +99,14 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
 
                 {openSections.category && (
                     <div className="mt-2 space-y-2">
-                        {(expandedCategories ? categories : categories.slice(0, 5)).map((cat) => (
+                        {(expandedCategories ? categories : categories.slice(0, 5)).filter(cat => cat.status).map((cat) => (
                             <div
-                                key={cat}
-                                className={`flex items-center space-x-2 p-2 rounded-lg border border-gray-300 hover:bg-gray-100 hover:shadow-md transition-all duration-300 ${filters.category === cat ? 'bg-indigo-100 border-indigo-600' : ''
+                                key={cat._id} // Sử dụng _id làm key
+                                className={`flex items-center space-x-2 p-2 rounded-lg border border-gray-300 hover:bg-gray-100 hover:shadow-md transition-all duration-300 ${filters.category === cat.name ? 'bg-indigo-100 border-indigo-600' : ''
                                     }`}
-                                onClick={() => handleFilterChange('category', cat)}
+                                onClick={() => handleFilterChange('category', cat.name)} // Sử dụng cat.name để lọc
                             >
-                                <span className="text-gray-700">{cat}</span>
+                                <span className="text-gray-700">{cat.name}</span>
                             </div>
                         ))}
                         {categories.length > 5 && (
@@ -144,15 +156,16 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
                 </div>
                 {openSections.color && (
                     <div className="mt-2 flex flex-wrap gap-2">
-                        {['green', 'red', 'yellow', 'orange', 'blue', 'purple', 'pink', 'black'].map((color) => (
+                        {availableColors.map((color) => (
                             <div
                                 key={color}
                                 className={`w-8 h-8 rounded-full cursor-pointer border border-gray-300 
-                  ${colorClasses[color]} 
-                  ${filters.color.includes(color) ? 'ring-2 ring-indigo-600 scale-110 shadow-lg' : ''} 
-                  transition-all duration-300 ease-in-out hover:scale-105 hover:ring-1 hover:ring-gray-400`}
+                              ${filters.color.includes(color) ? 'ring-2 ring-indigo-600 scale-110 shadow-lg' : ''} 
+                              transition-all duration-300 ease-in-out hover:scale-105 hover:ring-1 hover:ring-gray-400`}
+                                style={{ backgroundColor: color }}
                                 onClick={() => handleFilterChange('color', color)}
-                            ></div>
+                            >
+                            </div>
                         ))}
                     </div>
                 )}
@@ -189,7 +202,7 @@ const ProductFilterSidebar = ({ onFilterChange, initialCategory = '' }) => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -1,89 +1,121 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { validateField } from '../../utils/validateFiled';
-import { Notification } from '../../component/message/message';
 import { Login } from '../../api/auth/loginAPI';
 import { setToken, getToken } from '../../utils/storage';
 import { ClipLoader } from "react-spinners";
+import ConfirmDialog from '../../component/common/ConfirmDialog';
+import Notification from '../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
 const LoginPage = () => {
-
-    // Check if user is already logged in
-    const token = getToken();
-    if (token) {
-        window.location.href = '/';
-    }
-
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'info' });
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [adminToken, setAdminToken] = useState(null); // Thêm state để lưu token tạm thời
 
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-    // State to manage notification
-    const [notification, setNotification] = useState({
-        isOpen: false,
-        message: '',
-        type: 'info',
-    });
+    useEffect(() => {
+        const token = getToken();
+        if (token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     const isFormValid =
         formData.email !== "" &&
         formData.password !== "" &&
         Object.values(errors).every(error => error === "");
 
+    const validateField = (name, value) => {
+        if (name === "email") return value.includes("@") ? "" : "Email không hợp lệ";
+        if (name === "password") return value.length >= 8 ? "" : "Mật khẩu phải dài ít nhất 6 ký tự";
+        return "";
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        setErrors({
-            ...errors,
-            [name]: validateField(name, value, formData),
-        });
-    }
+        setErrors({ ...errors, [name]: validateField(name, value) });
+    };
 
-    const closeNotification = () => {
-        setNotification({ ...notification, isOpen: false });
-    }
+    const closeNotification = () => setNotification({ ...notification, isOpen: false });
+
+    const handleLoginSuccess = (token, destination) => {
+        setToken(token);
+        navigate(destination);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log(formData);
         try {
             const response = await Login(formData);
-            setNotification({
-                isOpen: true,
-                message: response.message,
-                type: response.success ? 'success' : 'error',
-            });
-            if (response.success) {
-                if (response.token) {
-                    setToken(response.token);
-                    setTimeout(() => {
-                        navigate('/');
-                    }, 2000);
-                }
+            if (!response.success) {
+                setNotification({
+                    isOpen: true,
+                    message: response.message,
+                    type: response.success ? 'success' : 'error',
+                });
+            }
+            if (response.role === "admin") {
+                setAdminToken(response.token);
+                setIsConfirmOpen(true);
+            } else if (response.role === "customer") {
+                setNotification({
+                    isOpen: true,
+                    message: response.message,
+                    type: response.success ? 'success' : 'error',
+                });
+                setTimeout(() => {
+                    if (response.success && response.token) {
+                        handleLoginSuccess(response.token, '/');
+                    }
+                }, 2000);
+
             }
         } catch (error) {
             setNotification({
                 isOpen: true,
-                message: 'Đã xảy ra lỗi khi đăng ký!',
+                message: error.response?.data?.message || 'Đã xảy ra lỗi khi đăng nhập!',
                 type: 'error',
             });
         } finally {
             setIsLoading(false);
         }
-    }
+    };
+
     return (
         <div>
-            <Notification
-                type={notification.type}
-                message={notification.message}
-                isOpen={notification.isOpen}
-                onClose={closeNotification}
+            {notification.isOpen && (
+                <Notification
+                    type={notification.type}
+                    message={notification.message}
+                    onClose={closeNotification}
+                />
+            )}
+            <Helmet>
+                <title>Đăng nhập</title>
+            </Helmet>
+
+
+
+            {/* ConfirmDialog */}
+            <ConfirmDialog
+                isOpen={isConfirmOpen}
+                title="Tài khoản Admin"
+                message="Bạn đang đăng nhập với tài khoản admin. Bạn có muốn chuyển sang giao diện quản trị không?"
+                onConfirm={() => {
+                    setIsConfirmOpen(false);
+                    handleLoginSuccess(adminToken, '/loginAdmin'); // Chuyển hướng đến trang admin
+                }}
+                onClose={() => {
+                    setIsConfirmOpen(false);
+                    handleLoginSuccess(adminToken, '/'); // Khi hủy, lưu token và về trang chủ
+                }}
             />
+
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
                 <div className="absolute w-full h-full">
                     <motion.div
@@ -193,14 +225,7 @@ const LoginPage = () => {
                                 </motion.p>
                             </motion.div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-700">Ghi nhớ đăng nhập</label>
-                                </div>
+                            <div className="flex items-center justify-end">
                                 <Link
                                     to="/forgot-password"
                                     className="text-sm text-blue-600 hover:text-blue-700 transition duration-300"

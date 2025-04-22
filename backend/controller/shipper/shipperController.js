@@ -3,10 +3,10 @@ const Shipper = require('../../model/Shipper');
 // Hàm tạo mới shipper
 const createShipper = async (req, res) => {
     try {
-        const { name, phone, avatar, email, region } = req.body;
+        const { name, phone, email, province, district } = req.body;
 
         // Kiểm tra đầu vào
-        if (!name || !phone || !email || !region) {
+        if (!name || !phone || !email || !province || !district) {
             return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin ❎' });
         }
 
@@ -22,7 +22,7 @@ const createShipper = async (req, res) => {
             return res.status(400).json({ message: 'Số điện thoại đã được sử dụng ❎' });
         }
 
-        const newShipper = new Shipper({ name, phone, avatar, email, region });
+        const newShipper = new Shipper({ name, phone, email, province, district });
         await newShipper.save();
 
         res.status(201).json({ message: 'Tạo shipper thành công ✅', newShipper });

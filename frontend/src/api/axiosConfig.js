@@ -17,9 +17,8 @@ api.interceptors.request.use(
         }
         // Đảm bảo Content-Type đúng khi gửi FormData
         if (config.data instanceof FormData) {
-            delete config.headers['Content-Type']; // Để Axios tự set multipart/form-data
+            delete config.headers['Content-Type'];
         }
-        console.log("Request headers:", config.headers); // Log để kiểm tra
         return config;
     },
     (error) => Promise.reject(error)

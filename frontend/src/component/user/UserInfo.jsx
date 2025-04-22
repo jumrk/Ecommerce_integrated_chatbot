@@ -211,6 +211,23 @@ const UserInfo = () => {
         setError(null);
     };
 
+    // Hàm kiểm tra định dạng email
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Hàm kiểm tra định dạng số điện thoại
+    const isValidPhone = (phone) => {
+        const phoneRegex = /^[0-9]{10}$/; // Giả sử số điện thoại có 10 chữ số
+        return phoneRegex.test(phone);
+    };
+
+    // Hàm kiểm tra tính hợp lệ của dữ liệu
+    const isFormValid = () => {
+        return isValidEmail(userInfo.email) && isValidPhone(userInfo.phone);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -235,7 +252,7 @@ const UserInfo = () => {
                         </button>
                         <button
                             onClick={handleSaveUserInfo}
-                            disabled={loading}
+                            disabled={!isFormValid() || loading}
                             className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto disabled:bg-blue-400"
                         >
                             {loading ? <ClipLoader size={20} color="#fff" /> : <><FiSave className="w-4 h-4" /> Lưu thay đổi</>}
@@ -319,6 +336,9 @@ const UserInfo = () => {
                                     : 'border-transparent bg-gray-50'
                                     }`}
                             />
+                            {!isValidEmail(userInfo.email) && isEditing && (
+                                <p className="text-red-500 text-sm mt-1">Email không hợp lệ</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -337,6 +357,9 @@ const UserInfo = () => {
                                 : 'border-transparent bg-gray-50'
                                 }`}
                         />
+                        {!isValidPhone(userInfo.phone) && isEditing && (
+                            <p className="text-red-500 text-sm mt-1">Số điện thoại không hợp lệ</p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>

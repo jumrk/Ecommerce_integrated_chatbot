@@ -13,7 +13,7 @@ router.get('/:id', voucherController.getVoucherById);
 router.post('/create-voucher', voucherController.createVoucher);
 
 // Update a voucher by ID
-router.put('/update-voucher/:id', voucherController.updateVoucher);
+router.put('/update-voucher/', voucherController.updateVoucher);
 
 // Delete a voucher by ID
 router.delete('/delete-voucher/:id', voucherController.deleteVoucher);

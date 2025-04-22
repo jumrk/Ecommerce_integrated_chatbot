@@ -1,5 +1,6 @@
 const Address = require("../../model/addressModel");
 
+
 // Lấy danh sách địa chỉ của người dùng
 const getAddresses = async (req, res) => {
     try {
@@ -13,11 +14,8 @@ const getAddresses = async (req, res) => {
 // Lấy chi tiết một địa chỉ
 const getAddressById = async (req, res) => {
     try {
-        const address = await Address.findById(req.params.id);
-        if (!address) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy địa chỉ ❌" });
-        }
-        res.status(200).json({ success: true, data: address });
+        const addresses = await Address.findById(req.params.id);
+        res.status(200).json({ success: true, data: addresses });
     } catch (error) {
         res.status(500).json({ success: false, message: "Lỗi máy chủ ❌", error: error.message });
     }

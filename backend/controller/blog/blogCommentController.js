@@ -21,10 +21,9 @@ const createComment = async (req, res) => {
 
 // tât cả các comment của một bài viết
 const getCommentsByBlog = async (req, res) => {
+    const blogId = req.params.id;
     try {
-        const { blogId } = req.params.id;
-
-        const comments = await BlogComment.find({ blogId }).populate('userId', 'name');
+        const comments = await BlogComment.find({ blogId }).populate('userId');
         res.status(200).json(comments);
     } catch (error) {
         res.status(500).json({ error });

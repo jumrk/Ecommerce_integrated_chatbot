@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaUpload, FaTimes } from 'react-icons/fa';
 
-const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
+const EditCategoryModal = ({ isOpen, category, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        icon: null,
-        isActive: true
+        image: null,
+        status: true
     });
     const [preview, setPreview] = useState(null);
     const [errors, setErrors] = useState({});
@@ -15,12 +15,12 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
     useEffect(() => {
         if (category) {
             setFormData({
-                name: category.name,
+                name: category.name || '',
                 description: category.description || '',
-                icon: category.icon,
-                isActive: category.isActive
+                image: null, // Không gán trực tiếp ảnh từ backend
+                status: category.status || true
             });
-            setPreview(category.icon);
+            setPreview(category.image ? `http://localhost:5000${category.image}` : null); // Hiển thị ảnh từ backend
         }
     }, [category]);
 
@@ -40,10 +40,10 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 1024 * 1024) {
+            if (file.size > 1024 * 1024) { // 1MB
                 setErrors(prev => ({
                     ...prev,
-                    icon: 'Kích thước ảnh không được vượt quá 1MB'
+                    image: 'Kích thước ảnh không được vượt quá 1MB'
                 }));
                 return;
             }
@@ -51,7 +51,7 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreview(reader.result);
-                setFormData(prev => ({ ...prev, icon: file }));
+                setFormData(prev => ({ ...prev, image: file }));
             };
             reader.readAsDataURL(file);
         }
@@ -59,7 +59,7 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
 
     const removeImage = () => {
         setPreview(null);
-        setFormData(prev => ({ ...prev, icon: null }));
+        setFormData(prev => ({ ...prev, image: null }));
     };
 
     const validateForm = () => {
@@ -77,7 +77,17 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
 
         try {
             setLoading(true);
-            await onUpdate(category.id, formData);
+
+            // Tạo FormData để gửi dữ liệu
+            const formDataToSend = new FormData();
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('status', formData.status);
+            if (formData.image) {
+                formDataToSend.append('category', formData.image); // Đặt tên trường là 'category'
+            }
+
+            await onSave(formDataToSend); // Gọi hàm onSave để gửi dữ liệu
             onClose();
         } catch (error) {
             setErrors(prev => ({
@@ -137,8 +147,8 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
                                 </div>
                             )}
                         </div>
-                        {errors.icon && (
-                            <p className="mt-1 text-sm text-red-600">{errors.icon}</p>
+                        {errors.image && (
+                            <p className="mt-1 text-sm text-red-600">{errors.image}</p>
                         )}
                     </div>
 
@@ -176,16 +186,18 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
 
                     {/* Status Toggle */}
                     <div className="mb-6">
-                        <label className="flex items-center">
-                            <input
-                                type="checkbox"
-                                name="isActive"
-                                checked={formData.isActive}
-                                onChange={handleChange}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">Kích hoạt danh mục</span>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Trạng thái
                         </label>
+                        <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        >
+                            <option value={true}>Hoạt động</option>
+                            <option value={false}>Ẩn</option>
+                        </select>
                     </div>
 
                     {/* Error Message */}

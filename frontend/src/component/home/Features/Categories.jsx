@@ -1,18 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import CardCategories from '../../card/CardCategories';
+import CardPlaceholder from '../../card/CardPlaceholder'
 import { SlideInWhenVisible } from '../../animation/SlideInWhenVisible';
+import { getCategories } from '../../../api/category/categoryProduct';
+import { useNavigate } from 'react-router-dom';
 const Categories = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const sliderRef = useRef(null);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate()
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await getCategories();
+                const category = data.filter(category => category.status)
+                setCategories(category);
+            } catch (error) {
+                setError(error);
+                console.error("Lỗi khi lấy danh mục:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const categories = [
-        { id: 1, name: 'Áo thun', description: 'Thoải mái, phong cách.', image: 'https://dosi-in.com/images/detailed/41/lnc_tr%C6%A1n_3.png' },
-        { id: 2, name: 'Quần jeans', description: 'Chất liệu bền.', image: 'https://i.pinimg.com/736x/66/10/29/66102910c5eb2892fc8bb1d7c6f275e4.jpg' },
-        { id: 3, name: 'Giày sneaker', description: 'Năng động, cá tính.', image: 'https://th.bing.com/th?id=OPAC.OxGXyc8ES9pqIQ474C474&w=592&h=550&o=5&pid=21.1' },
-        { id: 4, name: 'Mũ lưỡi trai', description: 'Thời thượng.', image: 'https://th.bing.com/th/id/OIP.ZRZgmJDvcgwldV_Nzlx5swHaHa?rs=1&pid=ImgDetMain' },
-        { id: 5, name: 'Túi xách', description: 'Sang trọng.', image: 'https://th.bing.com/th/id/OIP.MBJFfAzTCx7hTNWKekr7JgHaHa?rs=1&pid=ImgDetMain' },
-    ];
+        fetchCategories();
+    }, []);
 
     const getVisibleItems = () => {
         if (window.innerWidth >= 1024) return 4;
@@ -64,6 +79,46 @@ const Categories = () => {
             return newIndex;
         });
     };
+
+    const renderCategories = () => {
+        if (loading) {
+            // Hiển thị placeholder cards khi đang tải
+            return Array.from({ length: visibleItems }).map((_, index) => (
+                <div
+                    key={`placeholder-${index}`}
+                    className="flex-shrink-0 w-full sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] snap-start"
+                >
+                    <div className="h-full">
+                        <CardPlaceholder />
+                    </div>
+                </div>
+            ));
+        }
+
+        if (error) {
+            return <p className="text-center text-red-500">Lỗi khi tải danh mục: {error.message}</p>;
+        }
+
+        // Hiển thị dữ liệu thật khi đã tải xong
+        return categories.map((category) => (
+            <div
+                key={category._id}
+                className="flex-shrink-0 w-full sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] snap-start"
+                onClick={() => { navigate(`/directory/all-products/${category.name}`) }}
+
+            >
+                <div className="h-full">
+                    <CardCategories
+                        id={category._id}
+                        image={`http://localhost:5000${category.image}`}
+                        name={category.name}
+                        description={category.description}
+                    />
+                </div>
+            </div>
+        ));
+    };
+
     return (
         <section className="py-7 bg-gray-100">
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
@@ -79,28 +134,13 @@ const Categories = () => {
                                     WebkitOverflowScrolling: 'touch',
                                 }}
                             >
-                                {categories.map((category) => (
-                                    <div
-                                        key={category.id}
-                                        className="flex-shrink-0 w-full sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] snap-start"
-                                    >
-                                        <div className="h-full">
-                                            <CardCategories
-                                                id={category.id}
-                                                image={category.image}
-                                                name={category.name}
-                                                description={category.description}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
+                                {renderCategories()} {/* Sử dụng hàm renderCategories */}
                             </div>
                         </SlideInWhenVisible>
                     </div>
 
                     {/* Navigation Buttons */}
                     <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 pointer-events-none">
-
                         <SlideInWhenVisible direction='left' delay={0.4}>
                             <button
                                 onClick={scrollLeft}
@@ -125,7 +165,7 @@ const Categories = () => {
 
                 {/* Dots Navigation */}
                 <SlideInWhenVisible direction='down' delay={0.4}>
-                    <div className="flex justify-center mt-6 space-x-2">
+                    <div className="flex justify-center mt-8 space-x-2">
                         {Array.from({ length: maxScrolls + 1 }).map((_, index) => (
                             <div
                                 key={index}

@@ -13,7 +13,7 @@ const {
 router.get("/", verifyToken, getAddresses);
 
 // Lấy chi tiết một địa chỉ
-router.get("/:id", verifyToken, getAddressById);
+router.get("/:id", getAddressById);
 
 // Thêm địa chỉ mới
 router.post("/", verifyToken, createAddress);

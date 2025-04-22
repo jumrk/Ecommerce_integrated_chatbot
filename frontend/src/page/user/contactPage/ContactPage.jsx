@@ -1,162 +1,158 @@
-import React, { useState } from 'react';
-import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaInstagram, FaFacebook, FaTwitter, FaShare, FaArrowLeft, FaCheck, FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import {
+    FaMapMarkerAlt, FaEnvelope, FaPhone, FaInstagram, FaFacebook,
+    FaTwitter, FaShare, FaArrowLeft, FaPaperPlane
+} from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { SlideGridWhenVisible } from '../../../component/animation/SlideGridWhenVisible';
 import { ScaleUpWhenVisible } from '../../../component/animation/ScaleUpWhenVisible';
 import { FlipInWhenVisible } from '../../../component/animation/FlipInWhenVisible';
-
+import { getUserMessages, sendMessage } from '../../../api/message/messageService';
+import { getToken } from '../../../utils/storage';
+import Loading from '../../../component/loading/loading';
+import { Helmet } from 'react-helmet';
 const ContactPage = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        message: '',
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    useEffect(() => {
+        const token = getToken()
+        setIsAuthenticated(!!token);
+    }, []);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchMessages();
+        }
+    }, [isAuthenticated]);
+
+    const fetchMessages = async () => {
+        try {
+            const response = await getUserMessages();
+            setMessages(response.data);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSubmit = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-            setError('Vui lòng điền đầy đủ thông tin.');
+        if (!isAuthenticated) {
+            navigate('/login', { state: { from: '/contact' } });
             return;
         }
 
-        setIsSubmitting(true);
-        setError('');
+        if (!newMessage.trim()) return;
 
-        setTimeout(() => {
-            console.log('Thông tin liên hệ đã được gửi:', formData);
-            setSuccess(true);
-            setFormData({
-                name: '',
-                email: '',
-                message: '',
-            });
-
-            // Reset sau 3 giây
-            setTimeout(() => {
-                setSuccess(false);
-                setIsSubmitting(false);
-            }, 3000);
-        }, 1000);
-    };
-
-    // Xử lý chia sẻ
-    const handleShare = () => {
-        if (navigator.share) {
-            navigator.share({
-                title: 'Liên Hệ - JUMRK',
-                text: 'Hãy liên hệ với JUMRK để nhận tư vấn thời trang!',
-                url: window.location.href,
-            }).catch((error) => console.error('Error sharing:', error));
-        } else {
-            alert('Sharing is not supported on this browser. Copy the URL: ' + window.location.href);
+        try {
+            const response = await sendMessage(newMessage);
+            setMessages(prev => [...prev, response.data]);
+            setNewMessage('');
+        } catch (error) {
+            setError(error.message);
         }
     };
 
+    const handleShare = async () => {
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'JUMRK - Liên hệ với chúng tôi',
+                    text: 'Trò chuyện trực tiếp với đội ngũ hỗ trợ của JUMRK',
+                    url: window.location.href,
+                });
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('Đã sao chép liên kết vào clipboard!');
+            }
+        } catch (error) {
+            console.error('Error sharing:', error);
+        }
+    };
+    if (loading) {
+        return <Loading />;
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
+            <Helmet>
+                <title>Liên hệ</title>
+            </Helmet>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Header */}
                 <FlipInWhenVisible>
                     <div className="text-center mb-12">
                         <h1 className="text-5xl font-bold text-gray-800 mb-4 drop-shadow-md">LIÊN HỆ VỚI CHÚNG TÔI</h1>
-                        <p className="text-xl text-gray-600">Hãy gửi tin nhắn để nhận tư vấn hoặc hợp tác cùng JUMRK</p>
+                        <p className="text-xl text-gray-600">Trò chuyện trực tiếp với đội ngũ hỗ trợ của JUMRK</p>
                     </div>
                 </FlipInWhenVisible>
 
                 {/* Layout grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {/* Form liên hệ */}
+                    {/* Khung chat */}
                     <SlideGridWhenVisible direction="left">
-                        <div className="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-500 hover:-translate-y-2 hover:shadow-xl">
+                        <div className="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-500 hover:-translate-y-2 hover:shadow-xl h-[500px] flex flex-col">
                             <FlipInWhenVisible>
-                                <h2 className="text-2xl font-bold text-gray-800 mb-6">Gửi tin nhắn</h2>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">Chat với chúng tôi</h2>
                             </FlipInWhenVisible>
 
-                            {success && (
-                                <ScaleUpWhenVisible>
-                                    <div className="mb-4 text-green-500 text-sm flex items-center">
-                                        <FaCheck className="mr-2" /> Tin nhắn của bạn đã được gửi thành công!
+                            {/* Danh sách tin nhắn */}
+                            <div className="flex-1 overflow-y-auto mb-4 p-2 border border-gray-200 rounded-md bg-gray-50">
+                                {error ? (
+                                    <div className="text-red-500 text-center">{error}</div>
+                                ) : messages.length === 0 ? (
+                                    <div className="text-gray-500 text-center">
+                                        Bắt đầu cuộc trò chuyện với chúng tôi!
                                     </div>
-                                </ScaleUpWhenVisible>
-                            )}
+                                ) : (
+                                    messages.map((msg, index) => (
+                                        <div
+                                            key={msg._id || index}
+                                            className={`mb-3 flex ${msg.sender === 'customer' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div
+                                                className={`max-w-xs p-3 rounded-lg shadow-sm ${msg.sender === 'customer'
+                                                    ? 'bg-indigo-500 text-white'
+                                                    : 'bg-gray-200 text-gray-800'
+                                                    }`}
+                                            >
+                                                <p>{msg.content}</p>
+                                                <span className={`text-xs block mt-1 ${msg.sender === 'customer' ? 'text-indigo-100' : 'text-gray-500'
+                                                    }`}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
 
-                            {error && (
-                                <ScaleUpWhenVisible>
-                                    <div className="mb-4 text-red-500 text-sm flex items-center">
-                                        <FaTimes className="mr-2" /> {error}
-                                    </div>
-                                </ScaleUpWhenVisible>
-                            )}
-
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <SlideGridWhenVisible direction="right">
-                                    <div>
-                                        <label className="block text-gray-700 font-semibold mb-2">Họ và tên</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
-                                            placeholder="Nhập họ và tên..."
-                                        />
-                                    </div>
-                                </SlideGridWhenVisible>
-
-                                <SlideGridWhenVisible direction="left">
-                                    <div>
-                                        <label className="block text-gray-700 font-semibold mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
-                                            placeholder="Nhập email của bạn..."
-                                        />
-                                    </div>
-                                </SlideGridWhenVisible>
-
-                                <SlideGridWhenVisible direction="right">
-                                    <div>
-                                        <label className="block text-gray-700 font-semibold mb-2">Tin nhắn</label>
-                                        <textarea
-                                            name="message"
-                                            value={formData.message}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 h-32 resize-none"
-                                            placeholder="Viết tin nhắn của bạn..."
-                                        />
-                                    </div>
-                                </SlideGridWhenVisible>
-
-                                <ScaleUpWhenVisible>
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className={`w-full py-3 rounded-md font-semibold transition-all duration-300 flex items-center justify-center ${isSubmitting
-                                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg'
-                                            }`}
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <FaCheck className="mr-2 animate-spin" size={16} /> Đang gửi...
-                                            </>
-                                        ) : (
-                                            'Gửi tin nhắn'
-                                        )}
-                                    </button>
-                                </ScaleUpWhenVisible>
+                            {/* Form gửi tin nhắn */}
+                            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder={isAuthenticated ? "Nhập tin nhắn..." : "Đăng nhập để gửi tin nhắn"}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+                                    disabled={!isAuthenticated}
+                                />
+                                <button
+                                    type="submit"
+                                    className={`p-2 rounded-full transition-colors duration-300 ${isAuthenticated
+                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
+                                    disabled={!isAuthenticated || !newMessage.trim()}
+                                >
+                                    <FaPaperPlane size={16} />
+                                </button>
                             </form>
                         </div>
                     </SlideGridWhenVisible>

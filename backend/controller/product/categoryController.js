@@ -11,8 +11,13 @@ const getCategories = async (req, res) => {
 
 const createCategory = async (req, res) => {
     try {
-        const { name, image, description } = req.body;
-        const category = new Category({ name, image, description });
+        const image = req.file && req.file.filename ? `/images/category/${req.file.filename}` : undefined;
+        const data = {
+            ...req.body,
+            image
+        };
+
+        const category = new Category(data);
         const createCategory = await category.save();
         if (!createCategory) {
             return res.status(400).json({ success: false, message: "Tạo danh mục thất bại❌" })
@@ -25,15 +30,25 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     const id = req.params.id;
-    const { name, image, description, status } = req.body;
     try {
-        const category = await Category.findByIdAndUpdate(id, { name, image, description, status }, { new: true });
+        console.log('File nhận được:', req.file); // Log thông tin tệp
+        console.log('Body nhận được:', req.body); // Log thông tin các trường khác
+
+        const image = req.file ? `/images/category/${req.file.filename}` : undefined;
+
+        const updatedData = {
+            ...req.body,
+            ...(image && { image }), // Chỉ thêm trường image nếu có ảnh mới
+        };
+
+        const category = await Category.findByIdAndUpdate(id, updatedData, { new: true });
         if (!category) {
-            return res.status(404).json({ success: false, message: "Danh mục không tồn tại❗" })
+            return res.status(404).json({ success: false, message: 'Danh mục không tồn tại!' });
         }
-        res.status(200).json({ success: true, message: "Cập nhật danh mục thành công✅" })
+        res.status(200).json(category);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Đã xảy ra lỗi ❎" })
+        console.error('Lỗi khi cập nhật danh mục:', error); // Log lỗi chi tiết
+        res.status(500).json({ success: false, message: 'Đã xảy ra lỗi khi cập nhật danh mục!', error });
     }
 };
 

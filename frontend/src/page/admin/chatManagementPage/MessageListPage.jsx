@@ -1,45 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiUser, FiClock, FiMessageCircle } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import { FiSearch, FiFilter, FiUser } from 'react-icons/fi';
+import Loading from '../../../component/loading/loading';
+import { getAllMailboxes } from '../../../api/message/messageService';
+import { Helmet } from 'react-helmet';
 
 const MessageListPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState([]);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [sortOrder, setSortOrder] = useState('newest');
 
     useEffect(() => {
-        // Giả lập API call
-        setTimeout(() => {
-            setMessages([
-                {
-                    id: 1,
-                    customerId: 101,
-                    customerName: "Nguyễn Văn A",
-                    customerAvatar: null,
-                    lastMessage: "Xin chào, tôi cần hỗ trợ về đơn hàng DH001",
-                    unreadCount: 3,
-                    lastMessageTime: "2024-03-21T10:30:00Z",
-                    status: "unread",
-                    isOnline: true
-                },
-                {
-                    id: 2,
-                    customerId: 102,
-                    customerName: "Trần Thị B",
-                    customerAvatar: null,
-                    lastMessage: "Cảm ơn bạn đã hỗ trợ",
-                    unreadCount: 0,
-                    lastMessageTime: "2024-03-21T09:15:00Z",
-                    status: "read",
-                    isOnline: false
-                },
-                // Thêm dữ liệu mẫu khác...
-            ]);
-            setLoading(false);
-        }, 1000);
+        fetchMailboxes();
     }, []);
+
+    const fetchMailboxes = async () => {
+        try {
+            setLoading(true);
+            const response = await getAllMailboxes();
+            const formattedMessages = response.data.map(mailbox => ({
+                id: mailbox._id,
+                customerId: mailbox.userId,
+                customerName: mailbox.userInfo.fullName || 'Người dùng',
+                customerAvatar: mailbox.userInfo.avatar,
+                lastMessage: mailbox.lastMessage.content,
+                unreadCount: mailbox.unreadCount,
+                lastMessageTime: mailbox.lastMessage.createdAt,
+                status: mailbox.unreadCount > 0 ? 'unread' : 'read',
+                isOnline: false // You might want to implement real-time online status
+            }));
+            setMessages(formattedMessages);
+        } catch (error) {
+            console.error('Error fetching mailboxes:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const formatTime = (dateString) => {
         const date = new Date(dateString);
@@ -69,10 +69,40 @@ const MessageListPage = () => {
         }).format(date);
     };
 
-    if (loading) return <LoadingSpinner />;
+    const filteredMessages = useMemo(() => {
+        let result = [...messages];
+
+        // Lọc theo trạng thái
+        if (statusFilter) {
+            result = result.filter(message => message.status === statusFilter);
+        }
+
+        // Tìm kiếm theo tên khách hàng hoặc nội dung tin nhắn cuối cùng
+        if (searchTerm) {
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            result = result.filter(message =>
+                message.customerName.toLowerCase().includes(lowerSearchTerm) ||
+                message.lastMessage.toLowerCase().includes(lowerSearchTerm)
+            );
+        }
+
+        // Sắp xếp
+        if (sortOrder === 'newest') {
+            result.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+        } else {
+            result.sort((a, b) => new Date(a.lastMessageTime) - new Date(b.lastMessageTime));
+        }
+
+        return result;
+    }, [messages, statusFilter, searchTerm, sortOrder]);
+
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Hộp thư khách hàng</title>
+            </Helmet>
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -87,6 +117,8 @@ const MessageListPage = () => {
                                 type="text"
                                 placeholder="Tìm kiếm tin nhắn..."
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>
@@ -104,7 +136,11 @@ const MessageListPage = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Trạng thái
                                 </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                >
                                     <option value="">Tất cả</option>
                                     <option value="unread">Chưa đọc</option>
                                     <option value="read">Đã đọc</option>
@@ -114,7 +150,11 @@ const MessageListPage = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Sắp xếp theo
                                 </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                >
                                     <option value="newest">Mới nhất</option>
                                     <option value="oldest">Cũ nhất</option>
                                 </select>
@@ -126,7 +166,7 @@ const MessageListPage = () => {
                 {/* Messages List */}
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="divide-y divide-gray-200">
-                        {messages.map((message) => (
+                        {filteredMessages.map((message) => (
                             <div
                                 key={message.id}
                                 className={`p-4 hover:bg-gray-50 cursor-pointer ${message.status === 'unread' ? 'bg-blue-50' : ''
@@ -138,7 +178,7 @@ const MessageListPage = () => {
                                         <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
                                             {message.customerAvatar ? (
                                                 <img
-                                                    src={message.customerAvatar}
+                                                    src={import.meta.env.VITE_API_URL + message.customerAvatar}
                                                     alt={message.customerName}
                                                     className="h-12 w-12 rounded-full object-cover"
                                                 />

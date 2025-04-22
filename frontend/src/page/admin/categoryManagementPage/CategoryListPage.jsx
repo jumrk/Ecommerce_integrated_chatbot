@@ -2,59 +2,88 @@ import React, { useState } from 'react';
 import { useCategories } from '../../../hooks/admin/categoryHook/useCategories';
 import ConfirmDialog from '../../../component/common/ConfirmDialog';
 import EditCategoryModal from '../../../component/admin/CategoryManagement/EditCategoryModal';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import Loading from '../../../component/loading/loading';
 import ButtonEdit from '../../../component/button/ButtonEdit';
 import ButtonDelete from '../../../component/button/ButtonDelete';
 import Pagination from '../../../component/pagination/Pagination';
 import StatusBadge from '../../../component/condition/ConditionCustom';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
+
+
 const CategoryListPage = () => {
     const {
         categories,
         loading,
-        error,
         handleDeleteCategory,
-        handleUpdateCategory
+        notification,
+        closeNotification,
+        onSaveEdit
     } = useCategories();
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
 
+    const [showFormEdit, setShowFormEdit] = useState(false);
+    const [dataEdit, setDataEdit] = useState(null);
+
     const handlePageChange = (page) => {
         setCurrentPage(page);
         window.scrollTo(0, 0);
-    };
-
-    const handleEdit = (category) => {
-        setSelectedCategory(category);
-        setShowEditModal(true);
     };
 
     const handleDelete = (category) => {
         setSelectedCategory(category);
         setShowConfirmDelete(true);
     };
+    const handleEdit = (category) => {
+        setShowFormEdit(true)
+        setDataEdit(category)
+    }
+    const closeFormEdit = () => {
+        setShowFormEdit(false)
+        setDataEdit(null)
+    }
 
     const confirmDelete = async () => {
         if (selectedCategory) {
-            await handleDeleteCategory(selectedCategory.id);
+            await handleDeleteCategory(selectedCategory._id);
             setShowConfirmDelete(false);
             setSelectedCategory(null);
         }
     };
 
-    if (loading) return <LoadingSpinner />;
-    if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Danh sách danh mục</title>
+            </Helmet>
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={closeNotification}
+                />
+            )}
+            {showFormEdit && (
+                <EditCategoryModal
+                    isOpen={showFormEdit}
+                    category={dataEdit}
+                    onClose={closeFormEdit}
+                    onSave={(formDataToSend) => onSaveEdit(dataEdit, formDataToSend, closeFormEdit)}
+
+                />
+            )}
+
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Quản lý danh mục</h1>
@@ -71,9 +100,6 @@ const CategoryListPage = () => {
                                     Mô tả
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Số sản phẩm
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Trạng thái
                                 </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -83,12 +109,12 @@ const CategoryListPage = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {currentCategories.map((category) => (
-                                <tr key={category.id} className="hover:bg-gray-50">
+                                <tr key={category._id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            {category.icon && (
+                                            {category.image && (
                                                 <img
-                                                    src={category.icon}
+                                                    src={"http://localhost:5000" + category.image}
                                                     alt=""
                                                     className="w-8 h-8 rounded-full mr-3"
                                                 />
@@ -104,12 +130,7 @@ const CategoryListPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">
-                                            {category.productCount || 0}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {category.isActive ? <StatusBadge type="success" text="Hoạt động" /> :
+                                        {category.status ? <StatusBadge type="success" text="Hoạt động" /> :
                                             <StatusBadge type="danger" text="Ẩn" />}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -135,16 +156,6 @@ const CategoryListPage = () => {
                     />
                 </div>
             </div>
-
-            <EditCategoryModal
-                isOpen={showEditModal}
-                category={selectedCategory}
-                onClose={() => {
-                    setShowEditModal(false);
-                    setSelectedCategory(null);
-                }}
-                onUpdate={handleUpdateCategory}
-            />
 
             <ConfirmDialog
                 isOpen={showConfirmDelete}

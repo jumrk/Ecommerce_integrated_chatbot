@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HeaderAdmin from '../component/header/HeaderAdmin';
 import SidebarAdmin from '../component/Sidebar/AdminSidebar';
-import { Outlet } from 'react-router-dom';
-
+import { Outlet, useNavigate } from 'react-router-dom';
+import { getToken } from '../utils/storage';
+import Notification from '../component/notification/Notification';
+import { getInforUser } from '../api/user/getInforUserAPI';
 const AdminLayout = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [notification, setNotification] = useState();
 
+    const token = getToken();
+    const navigate = useNavigate();
+    useEffect(() => {
+        const fetchData = async () => {
+            const checkUser = await getInforUser()
+            if (!token) {
+                navigate('/login');
+            }
+            if (checkUser.role === 'customer') {
+                navigate('/login')
+            }
+        }
+        fetchData()
+    }, [])
     React.useEffect(() => {
         const handleResize = () => {
             const isMobileView = window.innerWidth < 1024;
@@ -26,6 +43,13 @@ const AdminLayout = () => {
 
     return (
         <div className="relative min-h-screen bg-gray-100">
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(undefined)}
+                />
+            )}
             {/* Header - Fixed */}
             <HeaderAdmin
                 toggleSidebar={toggleSidebar}

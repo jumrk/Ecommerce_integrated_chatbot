@@ -1,92 +1,49 @@
-const Shipping = require("../../model/ShippingMethod");
+const ShippingConfig = require('../../model/ShippingMethod');
 
-// 🆕 Tạo phương thức giao hàng
-const createShipping = async (req, res) => {
+exports.getShippingConfig = async (req, res) => {
     try {
-        let { name, description, type, shippingFees, codFee, status } = req.body;
-
-        if (!name || !type) {
-            return res.status(400).json({ success: false, message: "Vui lòng cung cấp đầy đủ thông tin ❗" });
+        const config = await ShippingConfig.findOne();
+        if (!config) {
+            return res.status(404).json({ message: 'Không tìm thấy cấu hình' });
         }
-
-        // Nếu là "Nhận tại cửa hàng", đặt phí vận chuyển = 0, phí COD = 0
-        if (type === "store_pickup") {
-            shippingFees = [];  // Gán lại giá trị hợp lệ
-            codFee = 0;
-        }
-
-        // Nếu là "Giao hàng COD" và chưa có phí COD, đặt mặc định là 0
-        if (type === "cod" && codFee === undefined) {
-            codFee = 0;
-        }
-
-        const newShipping = new Shipping({ name, description, type, shippingFees, codFee, status });
-        await newShipping.save();
-
-        res.status(201).json({ success: true, message: "Tạo phương thức giao hàng thành công ✅", data: newShipping });
+        res.json(config);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi tạo phương thức giao hàng ❗", error: error.message });
-    }
-};
-// 📥 Lấy danh sách phương thức giao hàng
-const getAllShippings = async (req, res) => {
-    try {
-        const shippings = await Shipping.find();
-        res.status(200).json({ success: true, data: shippings });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi lấy danh sách ❗", error: error.message });
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
 };
 
-// 📌 Lấy thông tin chi tiết phương thức giao hàng
-const getShippingById = async (req, res) => {
+exports.createShippingConfig = async (req, res) => {
     try {
-        const shipping = await Shipping.findById(req.params.id);
-        if (!shipping) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy phương thức giao hàng ❌" });
+        const existingConfig = await ShippingConfig.findOne();
+        if (existingConfig) {
+            return res.status(400).json({ message: 'Cấu hình đã tồn tại' });
         }
-        res.status(200).json({ success: true, data: shipping });
+        const config = new ShippingConfig(req.body);
+        await config.save();
+        res.status(201).json(config);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi lấy thông tin ❗", error: error.message });
+        res.status(500).json({ message: 'Lỗi khi tạo cấu hình', error: error.message });
     }
 };
 
-// 🔄 Cập nhật phương thức giao hàng
-const updateShipping = async (req, res) => {
+exports.updateShippingConfig = async (req, res) => {
     try {
-        const { name, description, type, shippingFees, codFee, status } = req.body;
-
-        if (!name || !type) {
-            return res.status(400).json({ success: false, message: "Vui lòng cung cấp đầy đủ thông tin ❗" });
-        }
-
-        const updatedShipping = await Shipping.findByIdAndUpdate(
-            req.params.id,
-            { name, description, type, shippingFees, codFee, status },
-            { new: true }
+        const config = await ShippingConfig.findOneAndUpdate(
+            {},
+            req.body,
+            { new: true, upsert: true }
         );
-
-        if (!updatedShipping) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy phương thức giao hàng ❌" });
-        }
-
-        res.status(200).json({ success: true, message: "Cập nhật thành công ✅", data: updatedShipping });
+        res.json(config);
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi cập nhật ❗", error: error.message });
+        res.status(500).json({ message: 'Lỗi khi cập nhật cấu hình', error: error.message });
     }
 };
 
-// ❌ Xóa phương thức giao hàng
-const deleteShipping = async (req, res) => {
+exports.deleteShippingConfig = async (req, res) => {
     try {
-        const shipping = await Shipping.findByIdAndDelete(req.params.id);
-        if (!shipping) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy phương thức giao hàng ❌" });
-        }
-        res.status(200).json({ success: true, message: "Xóa thành công ✅" });
+        await ShippingConfig.deleteOne({});
+        res.json({ message: 'Xóa cấu hình thành công' });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi xóa ❗", error: error.message });
+        res.status(500).json({ message: 'Lỗi khi xóa cấu hình', error: error.message });
     }
 };
-
-module.exports = { createShipping, getAllShippings, getShippingById, updateShipping, deleteShipping };

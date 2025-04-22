@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     FaInstagram, FaFacebook, FaArrowLeft, FaTwitter, FaMapMarkerAlt,
     FaEnvelope, FaPhone, FaShare, FaUsers, FaStore, FaStar, FaTshirt, FaHandshake, FaGlobe, FaLightbulb, FaAward, FaTrophy, FaHeart
@@ -6,40 +6,44 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { SlideGridWhenVisible } from '../../../component/animation/SlideGridWhenVisible';
 import { motion } from 'framer-motion';
-
+import Loading from '../../../component/loading/loading';
+import { Helmet } from 'react-helmet';
 const AboutUsPage = () => {
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState(true)
+    setTimeout(() => {
+        setLoading(false)
+    }, 2000);
     const teamMembers = [
         {
-            name: 'Nguyễn Minh Anh',
+            name: 'Nguyễn Văn Thuận',
             role: 'CEO & Nhà Thiết Kế',
             image: 'https://i.pravatar.cc/150?img=1',
-            bio: 'Minh Anh là người sáng lập, dẫn dắt thương hiệu thời trang với hơn 10 năm kinh nghiệm trong ngành. Cô từng học tại Học viện Thời trang Paris và có kinh nghiệm làm việc tại các thương hiệu lớn như Chanel và Dior.',
+            bio: 'Văn Thuận là người sáng lập, dẫn dắt thương hiệu thời trang với hơn 10 năm kinh nghiệm trong ngành. Cô từng học tại Học viện Thời trang Paris và có kinh nghiệm làm việc tại các thương hiệu lớn như Chanel và Dior.',
             expertise: ['Thiết kế thời trang', 'Quản lý chiến lược', 'Phát triển thương hiệu'],
             achievements: ['Top 30 under 30 Forbes Vietnam', 'Giải thưởng Nhà thiết kế trẻ 2020']
         },
         {
-            name: 'Trần Thị Hồng',
+            name: 'Nguyễn Văn Thuận',
             role: 'Giám đốc Marketing',
             image: 'https://i.pravatar.cc/150?img=2',
-            bio: 'Hồng có hơn 8 năm kinh nghiệm trong lĩnh vực digital marketing và xây dựng thương hiệu. Cô từng là Marketing Manager tại Lazada và Shopee Việt Nam.',
+            bio: 'Nguyễn Văn Thuận có hơn 8 năm kinh nghiệm trong lĩnh vực digital marketing và xây dựng thương hiệu. Cô từng là Marketing Manager tại Lazada và Shopee Việt Nam.',
             expertise: ['Digital Marketing', 'Brand Strategy', 'Social Media Management'],
             achievements: ['Best Marketing Campaign 2022', 'Social Media Award 2021']
         },
         {
-            name: 'Lê Văn Nam',
+            name: 'Nguyễn Văn Thuận',
             role: 'Chuyên gia Phong Cách',
             image: 'https://i.pravatar.cc/150?img=3',
-            bio: 'Nam là chuyên gia tư vấn phong cách với chứng chỉ từ Fashion Institute of Technology (FIT). Anh có 6 năm kinh nghiệm trong ngành thời trang cao cấp.',
+            bio: 'Nguyễn Văn Thuận là chuyên gia tư vấn phong cách với chứng chỉ từ Fashion Institute of Technology (FIT). Anh có 6 năm kinh nghiệm trong ngành thời trang cao cấp.',
             expertise: ['Personal Styling', 'Fashion Consulting', 'Trend Analysis'],
             achievements: ['Best Fashion Stylist 2023', 'Fashion Influencer of the Year']
         },
         {
-            name: 'Phạm Thu Thảo',
+            name: 'Nguyễn Văn Thuận',
             role: 'Giám đốc Sản phẩm',
             image: 'https://i.pravatar.cc/150?img=4',
-            bio: 'Thảo chịu trách nhiệm phát triển sản phẩm và quản lý chuỗi cung ứng. 12 năm kinh nghiệm trong ngành dệt may và thời trang.',
+            bio: 'Nguyễn Văn Thuận chịu trách nhiệm phát triển sản phẩm và quản lý chuỗi cung ứng. 12 năm kinh nghiệm trong ngành dệt may và thời trang.',
             expertise: ['Product Development', 'Supply Chain', 'Quality Control'],
             achievements: ['Supply Chain Excellence Award', 'Best Product Innovation 2022']
         },
@@ -56,37 +60,37 @@ const AboutUsPage = () => {
 
     const timeline = [
         {
-            year: '2018',
+            year: '2020',
             title: 'Thành lập',
             description: 'JUMRK được thành lập tại Đà Nẵng với cửa hàng đầu tiên rộng 100m2',
             milestone: 'Đạt doanh thu 1 tỷ đồng trong 6 tháng đầu hoạt động'
         },
         {
-            year: '2019',
+            year: '2021',
             title: 'Mở rộng',
-            description: 'Mở chi nhánh đầu tiên tại TP.HCM, ra mắt dòng sản phẩm cao cấp JUMRK Premium',
+            description: 'Mở chi nhánh đầu tiên tại Đà nẵng, ra mắt dòng sản phẩm cao cấp JUMRK Premium',
             milestone: 'Đạt 10,000 khách hàng thân thiết'
         },
         {
-            year: '2020',
+            year: '2022',
             title: 'Chuyển đổi số',
             description: 'Ra mắt nền tảng thương mại điện tử, phát triển ứng dụng di động JUMRK App',
             milestone: 'Tăng trưởng 200% doanh số online'
         },
         {
-            year: '2021',
+            year: '2023',
             title: 'Quốc tế hóa',
             description: 'Mở rộng thị trường sang Singapore và Malaysia, ra mắt BST hợp tác quốc tế',
             milestone: 'Xuất khẩu đạt 2 triệu USD'
         },
         {
-            year: '2022',
+            year: '2024',
             title: 'Đổi mới',
             description: 'Áp dụng công nghệ AR/VR vào trải nghiệm mua sắm, ra mắt dịch vụ tư vấn thời trang 1-1',
             milestone: 'Đạt giải thưởng Innovation in Fashion Retail'
         },
         {
-            year: '2023',
+            year: '2025',
             title: 'Phát triển bền vững',
             description: 'Triển khai chiến lược thời trang bền vững, ra mắt dòng sản phẩm eco-friendly',
             milestone: 'Được chứng nhận Sustainable Fashion Brand of the Year'
@@ -151,6 +155,9 @@ const AboutUsPage = () => {
 
     const renderAchievements = () => (
         <section className="mb-20 bg-indigo-50 py-16 rounded-3xl">
+            <Helmet>
+                <title>Về chúng tôi</title>
+            </Helmet>
             <h2 className="text-4xl font-bold text-gray-800 mb-12 text-center">Thành Tựu Nổi Bật</h2>
             <div className="max-w-4xl mx-auto px-4">
                 <SlideGridWhenVisible
@@ -188,6 +195,10 @@ const AboutUsPage = () => {
             </div>
         </section>
     );
+
+    if (loading) {
+        return <Loading />
+    }
 
     return (
         <div className="min-h-screen">
@@ -305,59 +316,6 @@ const AboutUsPage = () => {
 
                 {/* Achievements Section */}
                 {renderAchievements()}
-
-                {/* Contact Section */}
-                <section className="mb-16">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-12 text-center">Liên Hệ Với Chúng Tôi</h2>
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="bg-white rounded-2xl shadow-xl p-8"
-                    >
-                        <SlideGridWhenVisible
-                            direction="up"
-                            className="grid grid-cols-1 md:grid-cols-2 gap-12"
-                            stagger={0.2}
-                        >
-                            <div className="space-y-6">
-                                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                    <FaMapMarkerAlt className="text-indigo-600" size={24} />
-                                    <p className="text-gray-700">123 Đường Lớn, Quận 1, TP.HCM, Việt Nam</p>
-                                </div>
-                                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                    <FaEnvelope className="text-indigo-600" size={24} />
-                                    <p className="text-gray-700">contact@fashionblog.com</p>
-                                </div>
-                                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                    <FaPhone className="text-indigo-600" size={24} />
-                                    <p className="text-gray-700">+84 123 456 789</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <div className="flex justify-center space-x-8">
-                                    <a href="#" className="p-4 bg-gray-50 rounded-full hover:bg-indigo-100 transition-colors duration-300">
-                                        <FaFacebook size={30} className="text-indigo-600" />
-                                    </a>
-                                    <a href="#" className="p-4 bg-gray-50 rounded-full hover:bg-indigo-100 transition-colors duration-300">
-                                        <FaTwitter size={30} className="text-indigo-600" />
-                                    </a>
-                                    <a href="#" className="p-4 bg-gray-50 rounded-full hover:bg-indigo-100 transition-colors duration-300">
-                                        <FaInstagram size={30} className="text-indigo-600" />
-                                    </a>
-                                </div>
-                                <button
-                                    onClick={handleShare}
-                                    className="mt-8 flex items-center justify-center space-x-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors duration-300"
-                                >
-                                    <FaShare size={20} />
-                                    <span>Chia sẻ trang này</span>
-                                </button>
-                            </div>
-                        </SlideGridWhenVisible>
-                    </motion.div>
-                </section>
 
                 {/* Back Button */}
                 <motion.button

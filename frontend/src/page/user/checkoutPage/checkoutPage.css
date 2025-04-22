@@ -1,0 +1,27 @@
+.infinite-scroll-container {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.infinite-scroll {
+    display: inline-flex;
+    animation: infiniteScroll 20s linear infinite;
+}
+
+@keyframes infiniteScroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(50%);
+    }
+}
+
+.infinite-scroll:hover {
+    animation-play-state: paused;
+    /* Tạm dừng khi hover */
+}

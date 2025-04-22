@@ -1,202 +1,78 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-
-// Dữ liệu mẫu
-const mockCategories = [
-    {
-        id: 1,
-        name: "Giày thể thao",
-        description: "Các loại giày dành cho hoạt động thể thao",
-        icon: "https://example.com/icons/sports-shoes.png",
-        isActive: true,
-        productCount: 25
-    },
-    {
-        id: 2,
-        name: "Giày công sở",
-        description: "Giày da sang trọng phù hợp môi trường công sở",
-        icon: "https://example.com/icons/formal-shoes.png",
-        isActive: true,
-        productCount: 15
-    },
-    {
-        id: 3,
-        name: "Giày casual",
-        description: "Giày thời trang phù hợp đi chơi, dạo phố",
-        icon: "https://example.com/icons/casual-shoes.png",
-        isActive: false,
-        productCount: 30
-    },
-    {
-        id: 4,
-        name: "Giày sandal",
-        description: "Các loại sandal và dép",
-        icon: "https://example.com/icons/sandals.png",
-        isActive: true,
-        productCount: 20
-    },
-    {
-        id: 5,
-        name: "Giày thể thao",
-        description: "Các loại giày dành cho hoạt động thể thao",
-        icon: "https://example.com/icons/sports-shoes.png",
-        isActive: true,
-        productCount: 25
-    },
-    {
-        id: 6,
-        name: "Giày công sở",
-        description: "Giày da sang trọng phù hợp môi trường công sở",
-        icon: "https://example.com/icons/formal-shoes.png",
-        isActive: true,
-        productCount: 15
-    },
-    {
-        id: 7,
-        name: "Giày casual",
-        description: "Giày thời trang phù hợp đi chơi, dạo phố",
-        icon: "https://example.com/icons/casual-shoes.png",
-        isActive: false,
-        productCount: 30
-    },
-    {
-        id: 8,
-        name: "Giày sandal",
-        description: "Các loại sandal và dép",
-        icon: "https://example.com/icons/sandals.png",
-        isActive: true,
-        productCount: 20
-    }, {
-        id: 9,
-        name: "Giày thể thao",
-        description: "Các loại giày dành cho hoạt động thể thao",
-        icon: "https://example.com/icons/sports-shoes.png",
-        isActive: true,
-        productCount: 25
-    },
-    {
-        id: 10,
-        name: "Giày công sở",
-        description: "Giày da sang trọng phù hợp môi trường công sở",
-        icon: "https://example.com/icons/formal-shoes.png",
-        isActive: true,
-        productCount: 15
-    },
-    {
-        id: 11,
-        name: "Giày casual",
-        description: "Giày thời trang phù hợp đi chơi, dạo phố",
-        icon: "https://example.com/icons/casual-shoes.png",
-        isActive: false,
-        productCount: 30
-    },
-    {
-        id: 12,
-        name: "Giày sandal",
-        description: "Các loại sandal và dép",
-        icon: "https://example.com/icons/sandals.png",
-        isActive: true,
-        productCount: 202
-    },
-];
-
-
-
+import { getCategories, deleteCategory, updateCategory } from '../../../api/category/categoryProduct';
 export const useCategories = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Giả lập fetch categories
+    const [notification, setNotification] = useState(null)
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
-                // Giả lập delay API
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                setCategories(mockCategories);
+                const data = await getCategories();
+                setCategories(data);
             } catch (err) {
-                setError('Có lỗi xảy ra khi tải danh sách danh mục');
-                console.error('Error fetching categories:', err);
+                setNotification({ message: "Không thể tải danh mục. Vui lòng thử lại sau.", type: "error" })
             } finally {
                 setLoading(false);
             }
         };
-
         fetchCategories();
     }, []);
 
-    const addCategory = async (categoryData) => {
+    const handleDeleteCategory = async (id) => {
         try {
-            // Giả lập API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const res = await deleteCategory(id); // Gọi API xóa danh mục
+            setLoading(true);
+            setTimeout(() => {
+                setLoading(false);
+                setNotification({ message: res.message, type: "success" })
+                setCategories((prev) => prev.filter((category) => category._id !== id)); // Xóa danh mục khỏi danh sách
+            }, 2000);
 
-            const newCategory = {
-                id: Math.max(...categories.map(c => c.id)) + 1,
-                name: categoryData.name,
-                description: categoryData.description,
-                icon: categoryData.icon ? URL.createObjectURL(categoryData.icon) : null,
-                isActive: categoryData.isActive,
-                productCount: 0,
-                createdAt: new Date().toISOString()
-            };
-
-            setCategories(prev => [...prev, newCategory]);
-            toast.success('Thêm danh mục thành công');
-            return newCategory;
-        } catch (error) {
-            console.error('Error adding category:', error);
-            toast.error('Có lỗi xảy ra khi thêm danh mục');
-            throw error;
+        } catch (err) {
+            setNotification({ message: "Không thể xóa danh mục. Vui lòng thử lại sau", type: "error" })
         }
     };
-
-    const updateCategory = async (id, categoryData) => {
+    const closeNotification = () => {
+        setNotification(null)
+    }
+    const onSaveEdit = async (dataEdit, formDataToSend, closeFormEdit) => {
         try {
-            // Giả lập API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (!dataEdit || !dataEdit._id) {
+                throw new Error('ID danh mục không hợp lệ!');
+            }
 
-            const updatedCategory = {
-                ...categories.find(cat => cat.id === id),
-                ...categoryData,
-                icon: categoryData.icon instanceof File
-                    ? URL.createObjectURL(categoryData.icon)
-                    : categoryData.icon,
-                updatedAt: new Date().toISOString()
-            };
+            // Gọi API cập nhật danh mục
+            const updatedCategory = await updateCategory(dataEdit._id, formDataToSend);
 
-            setCategories(prev =>
-                prev.map(cat => cat.id === id ? updatedCategory : cat)
-            );
-            toast.success('Cập nhật danh mục thành công');
-            return updatedCategory;
+            closeFormEdit();
+            setLoading(true);
+            setTimeout(() => {
+                setLoading(false);
+                // Cập nhật danh sách danh mục trong giao diện
+                setCategories((prev) =>
+                    prev.map((category) =>
+                        category._id === updatedCategory._id ? updatedCategory : category
+                    )
+                );
+
+                // Hiển thị thông báo thành công
+                closeNotification();
+                setNotification({ message: 'Cập nhật danh mục thành công!', type: 'success' });
+
+                // Đóng modal chỉnh sửa
+            }, 2000);
         } catch (error) {
-            console.error('Error updating category:', error);
-            toast.error('Có lỗi xảy ra khi cập nhật danh mục');
-            throw error;
+            console.error('Lỗi khi cập nhật danh mục:', error);
+            setNotification({ message: 'Có lỗi xảy ra khi cập nhật danh mục!', type: 'error' });
         }
     };
-
-    const deleteCategory = async (id) => {
-        try {
-            // Giả lập API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            setCategories(prev => prev.filter(cat => cat.id !== id));
-            toast.success('Xóa danh mục thành công');
-        } catch (error) {
-            console.error('Error deleting category:', error);
-            toast.error('Có lỗi xảy ra khi xóa danh mục');
-            throw error;
-        }
-    };
-
     return {
         categories,
         loading,
-        error,
-        addCategory,
-        updateCategory,
-        deleteCategory
+        handleDeleteCategory,
+        notification,
+        closeNotification,
+        onSaveEdit
     };
 };

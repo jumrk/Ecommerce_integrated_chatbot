@@ -1,129 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiUser, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
-import { toast } from 'react-toastify';
+import { FiSearch, FiFilter, FiUser, FiCheck, FiX } from 'react-icons/fi';
+import Loading from '../../../component/loading/loading';
 import Pagination from '../../../component/pagination/Pagination';
 import ButtonEdit from '../../../component/button/ButtonEdit';
+import { getAllUsers, updateUserRole } from '../../../api/user/userManagerAPI';
+import Notification from '../../../component/notification/Notification';
+import { Helmet } from 'react-helmet';
+
 const CustomerRolesPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState([]);
+    const [notification, setNotification] = useState(null);
     const [filterOpen, setFilterOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
+    const [editingUser, setEditingUser] = useState(null); // ID của user đang chỉnh sửa
+    const [tempRole, setTempRole] = useState(''); // Vai trò tạm thời khi chỉnh sửa
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filters, setFilters] = useState({
+        role: 'all',
+        status: 'all',
+    });
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = users.slice(indexOfFirstItem, indexOfLastItem);
+
     useEffect(() => {
-        // Giả lập API call
-        setTimeout(() => {
-            setUsers([
-                {
-                    id: 1,
-                    name: "Nguyễn Văn Admin",
-                    email: "admin@example.com",
-                    role: "admin",
-                    status: "active",
-                    lastLogin: "2024-03-20T08:00:00Z",
-                    createdAt: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 2,
-                    name: "Trần Thị B",
-                    email: "customer1@example.com",
-                    role: "customer",
-                    status: "active",
-                    lastLogin: "2024-03-19T10:00:00Z",
-                    createdAt: "2024-01-15T00:00:00Z"
-                },
-                {
-                    id: 3,
-                    name: "Lê Văn C",
-                    email: "customer2@example.com",
-                    role: "customer",
-                    status: "inactive",
-                    lastLogin: "2024-03-18T15:00:00Z",
-                    createdAt: "2024-01-20T00:00:00Z"
-                },
-                {
-                    id: 4,
-                    name: "Nguyễn Thị D",
-                    email: "customer3@example.com",
-                    role: "customer",
-                    status: "active",
-                    lastLogin: "2024-03-17T12:00:00Z",
-                    createdAt: "2024-01-25T00:00:00Z"
-                },
-                {
-                    id: 5,
-                    name: "Trần Văn E",
-                    email: "customer4@example.com",
-                    role: "customer",
-                    status: "inactive",
-                    lastLogin: "2024-03-16T14:00:00Z",
-                    createdAt: "2024-01-30T00:00:00Z"
-                },
-                {
-                    id: 6,
-                    name: "Nguyễn Thị F",
-                    email: "customer5@example.com",
-                    role: "customer",
-                    status: "active",
-                    lastLogin: "2024-03-15T16:00:00Z",
-                    createdAt: "2024-02-05T00:00:00Z"
-                },
-                {
-                    id: 7,
-                    name: "Lê Văn G",
-                    email: "customer6@example.com",
-                    role: "customer",
-                    status: "inactive",
-                    lastLogin: "2024-03-14T18:00:00Z",
-                    createdAt: "2024-02-10T00:00:00Z"
-                },
-                {
-                    id: 8,
-                    name: "Nguyễn Thị H",
-                    email: "customer7@example.com",
-                    role: "customer",
-                    status: "active",
-                    lastLogin: "2024-03-13T20:00:00Z",
-                    createdAt: "2024-02-15T00:00:00Z"
-                },
-                {
-                    id: 9,
-                    name: "Lê Văn I",
-                    email: "customer8@example.com",
-                    role: "customer",
-                    status: "inactive",
-                    lastLogin: "2024-03-12T22:00:00Z",
-                    createdAt: "2024-02-20T00:00:00Z"
-                },
-                {
-                    id: 10,
-                    name: "Nguyễn Thị K",
-                    email: "customer9@example.com",
-                    role: "customer",
-                    status: "active",
-                    lastLogin: "2024-03-11T24:00:00Z",
-                    createdAt: "2024-02-25T00:00:00Z"
-                },
-                {
-                    id: 11,
-                    name: "Lê Văn M",
-                    email: "customer10@example.com",
-                    role: "customer",
-                    status: "inactive",
-                    lastLogin: "2024-03-10T02:00:00Z",
-                    createdAt: "2024-03-01T00:00:00Z"
-                }
-                // Thêm dữ liệu mẫu khác...
-            ]);
-            setLoading(false);
-        }, 1000);
+        fetchUsers();
     }, []);
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const data = await getAllUsers();
+            const formattedUsers = data.map(user => ({
+                id: user._id,
+                name: user.fullName || 'Chưa có tên',
+                email: user.email || 'Chưa có email',
+                role: user.role || 'customer',
+                status: user.isActive ? 'active' : 'inactive',
+                lastLogin: user.lastLogin || user.updatedAt,
+                createdAt: user.createdAt
+            }));
+            setUsers(formattedUsers);
+        } catch (error) {
+            setNotification({
+                type: 'error',
+                message: error.message || 'Không thể tải danh sách người dùng'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const formatDate = (dateString) => {
         return new Intl.DateTimeFormat('vi-VN', {
@@ -135,22 +64,45 @@ const CustomerRolesPage = () => {
         }).format(new Date(dateString));
     };
 
-    const handleRoleChange = async (userId, newRole) => {
+    const handleEditClick = (user) => {
+        setEditingUser(user.id);
+        setTempRole(user.role);
+    };
+
+    const handleRoleChange = async (userId) => {
         try {
-            setLoading(true);
-            // Giả lập API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (tempRole !== 'admin' &&
+                users.filter(u => u.role === 'admin').length <= 1 &&
+                users.find(u => u.id === userId)?.role === 'admin') {
+                setNotification({
+                    type: 'error',
+                    message: 'Phải có ít nhất một quản trị viên'
+                });
+                return;
+            }
+            setLoading(true)
+            const response = await updateUserRole(userId, tempRole);
 
-            setUsers(users.map(user =>
-                user.id === userId ? { ...user, role: newRole } : user
-            ));
-
-            toast.success('Cập nhật vai trò thành công');
+            if (response.success) {
+                setUsers(prevUsers =>
+                    prevUsers.map(user =>
+                        user.id === userId ? { ...user, role: tempRole } : user
+                    )
+                );
+                setLoading(false)
+                setNotification({
+                    type: 'success',
+                    message: 'Cập nhật vai trò thành công'
+                });
+            }
         } catch (error) {
-            toast.error('Có lỗi xảy ra khi cập nhật vai trò');
+            setNotification({
+                type: 'error',
+                message: error.message || 'Có lỗi xảy ra khi cập nhật vai trò'
+            });
         } finally {
-            setLoading(false);
             setEditingUser(null);
+            setTempRole('');
         }
     };
 
@@ -176,64 +128,108 @@ const CustomerRolesPage = () => {
         }
     };
 
-    if (loading) return <LoadingSpinner />;
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = (
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        const matchesRole = filters.role === 'all' || user.role === filters.role;
+        const matchesStatus = filters.status === 'all' || user.status === filters.status;
+
+        return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handleFilterChange = (filterType, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterType]: value
+        }));
+        setCurrentPage(1); // Reset về trang đầu khi filter thay đổi
+    };
+
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Phân quyền người dùng</title>
+            </Helmet>
+            {notification && (
+                <Notification
+                    type={notification.type}
+                    message={notification.message}
+                    onClose={() => setNotification(null)}
+                />
+            )}
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Phân quyền người dùng</h1>
                 </div>
 
-                {/* Search and Filter */}
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1">
                             <div className="relative flex-1">
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm người dùng..."
+                                    placeholder="Tìm kiếm theo tên hoặc email..."
                                     className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
                                 />
                                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             </div>
                             <button
                                 onClick={() => setFilterOpen(!filterOpen)}
-                                className="p-2 border rounded-lg hover:bg-gray-50"
+                                className={`p-2 border rounded-lg hover:bg-gray-50 ${filterOpen ? 'bg-blue-50 border-blue-500' : ''}`}
                             >
-                                <FiFilter className="text-gray-600" />
+                                <FiFilter className={`${filterOpen ? 'text-blue-500' : 'text-gray-600'}`} />
                             </button>
                         </div>
                     </div>
 
                     {filterOpen && (
-                        <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Vai trò
-                                </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Tất cả</option>
-                                    <option value="admin">Quản trị viên</option>
-                                    <option value="customer">Khách hàng</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Trạng thái
-                                </label>
-                                <select className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Tất cả</option>
-                                    <option value="active">Đang hoạt động</option>
-                                    <option value="inactive">Không hoạt động</option>
-                                </select>
+                        <div className="mt-4 pt-4 border-t">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Vai trò
+                                    </label>
+                                    <select
+                                        value={filters.role}
+                                        onChange={(e) => handleFilterChange('role', e.target.value)}
+                                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="all">Tất cả vai trò</option>
+                                        <option value="admin">Quản trị viên</option>
+                                        <option value="customer">Khách hàng</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Trạng thái
+                                    </label>
+                                    <select
+                                        value={filters.status}
+                                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="all">Tất cả trạng thái</option>
+                                        <option value="active">Đang hoạt động</option>
+                                        <option value="inactive">Không hoạt động</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Users Table */}
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -286,16 +282,30 @@ const CustomerRolesPage = () => {
                                             {editingUser === user.id ? (
                                                 <div className="flex items-center gap-2">
                                                     <select
-                                                        defaultValue={user.role}
+                                                        value={tempRole}
+                                                        onChange={(e) => setTempRole(e.target.value)}
                                                         className="border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                                                        disabled={
+                                                            user.role === 'admin' &&
+                                                            users.filter(u => u.role === 'admin').length <= 1 &&
+                                                            tempRole !== 'admin'
+                                                        }
                                                     >
                                                         <option value="admin">Quản trị viên</option>
                                                         <option value="customer">Khách hàng</option>
                                                     </select>
                                                     <button
-                                                        onClick={() => setEditingUser(null)}
-                                                        className="text-gray-500 hover:text-gray-700"
+                                                        onClick={() => handleRoleChange(user.id)}
+                                                        className="text-green-500 hover:text-green-700"
+                                                    >
+                                                        <FiCheck />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingUser(null);
+                                                            setTempRole('');
+                                                        }}
+                                                        className="text-red-500 hover:text-red-700"
                                                     >
                                                         <FiX />
                                                     </button>
@@ -320,7 +330,7 @@ const CustomerRolesPage = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             {editingUser !== user.id && (
                                                 <ButtonEdit
-                                                    onClick={() => setEditingUser(user.id)}
+                                                    onClick={() => handleEditClick(user)}
                                                     text="Sửa"
                                                 />
                                             )}
@@ -332,10 +342,9 @@ const CustomerRolesPage = () => {
                     </div>
                 </div>
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={currentPage}
-                    totalItems={users.length}
+                    totalItems={filteredUsers.length} // Cập nhật totalItems
                     itemsPerPage={itemsPerPage}
                     onPageChange={setCurrentPage}
                 />

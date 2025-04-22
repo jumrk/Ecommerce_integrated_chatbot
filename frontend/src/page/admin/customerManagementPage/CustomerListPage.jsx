@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiFilter, FiMail, FiPhone, FiUser, FiShoppingBag } from 'react-icons/fi';
-import LoadingSpinner from '../../../component/common/LoadingSpinner';
+import Loading from '../../../component/loading/loading';
 import Pagination from '../../../component/pagination/Pagination';
 import ButtonDelete from '../../../component/button/ButtonDelete';
 import ConditionCustom from '../../../component/condition/ConditionCustom';
+import { getAllUsers, deleteUserById, updateUserStatus } from '../../../api/user/userManagerAPI';
+import { getOrdersByUserId } from '../../../api/order/orderService';
+import ConfirmDialog from '../../../component/common/ConfirmDialog';
+import Notification from '../../../component/notification/Notification'
+import { Helmet } from 'react-helmet';
 const CustomerListPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -12,152 +17,69 @@ const CustomerListPage = () => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [notification, setNotification] = useState(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentCustomers = customers.slice(indexOfFirstItem, indexOfLastItem);
 
     useEffect(() => {
-        // Giả lập API call
-        setTimeout(() => {
-            setCustomers([
-                {
-                    id: 1,
-                    name: "Nguyễn Văn A",
-                    email: "nguyenvana@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 2,
-                    name: "Nguyễn Văn B",
-                    email: "nguyenvanb@example.com",
-                    phone: "0987654321",
-                    totalOrders: 10,
-                    totalSpent: 25000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 3,
-                    name: "Nguyễn Văn C",
-                    email: "nguyenvanc@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 4,
-                    name: "Nguyễn Văn D",
-                    email: "nguyenvand@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 5,
-                    name: "Nguyễn Văn E",
-                    email: "nguyenvane@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 6,
-                    name: "Nguyễn Văn F",
-                    email: "nguyenvanf@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-
-                {
-                    id: 7,
-                    name: "Nguyễn Văn G",
-                    email: "nguyenvang@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 8,
-                    name: "Nguyễn Văn H",
-                    email: "nguyenvanh@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 9,
-                    name: "Nguyễn Văn I",
-                    email: "nguyenvania@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 10,
-                    name: "Nguyễn Văn J",
-                    email: "nguyenvanj@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 11,
-                    name: "Nguyễn Văn K",
-                    email: "nguyenvank@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                },
-                {
-                    id: 12,
-                    name: "Nguyễn Văn L",
-                    email: "nguyenvanl@example.com",
-                    phone: "0123456789",
-                    totalOrders: 5,
-                    totalSpent: 15000000,
-                    lastOrder: "2024-03-15T08:00:00Z",
-                    status: "active",
-                    joinDate: "2024-01-01T00:00:00Z"
-                }
-                // Thêm dữ liệu mẫu khác...
-            ]);
-            setLoading(false);
-        }, 1000);
+        fetchUsers();
     }, []);
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const data = await getAllUsers();
+
+            // Fetch orders for each user
+            const usersWithOrders = await Promise.all(
+                data.map(async (user) => {
+                    try {
+                        const orders = await getOrdersByUserId(user._id);
+                        const totalSpent = orders.reduce((sum, order) => {
+                            return sum + (order.status !== 'cancelled' ? order.total : 0);
+                        }, 0);
+
+                        return {
+                            id: user._id,
+                            name: user.fullName || 'Chưa có tên',
+                            email: user.email || 'Chưa có email',
+                            phone: user.phone || 'Chưa có SĐT',
+                            totalOrders: orders.length,
+                            totalSpent: totalSpent,
+                            lastOrder: orders.length > 0 ? orders[0].createdAt : null,
+                            status: user.isActive ? 'active' : 'inactive',
+                            joinDate: user.createdAt || null
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching orders for user ${user._id}:`, error);
+                        return {
+                            id: user._id,
+                            name: user.fullName || 'Chưa có tên',
+                            email: user.email || 'Chưa có email',
+                            phone: user.phone || 'Chưa có SĐT',
+                            totalOrders: 0,
+                            totalSpent: 0,
+                            lastOrder: null,
+                            status: user.isActive ? 'active' : 'inactive',
+                            joinDate: user.createdAt || null
+                        };
+                    }
+                })
+            );
+
+            setCustomers(usersWithOrders);
+        } catch (error) {
+            setNotification({
+                type: 'error',
+                message: error.message || 'Không thể tải danh sách khách hàng'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -167,26 +89,92 @@ const CustomerListPage = () => {
     };
 
     const formatDate = (dateString) => {
-        return new Intl.DateTimeFormat('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).format(new Date(dateString));
-    };
+        if (!dateString) return 'Chưa có';
 
-    const handleDeleteAccount = (e, customerId) => {
-        e.stopPropagation();
-        // Giả lập API call
-        const confirmed = window.confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.');
-        if (confirmed) {
-            setCustomers(customers.filter(customer => customer.id !== customerId));
+        try {
+            return new Intl.DateTimeFormat('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(new Date(dateString));
+        } catch (error) {
+            return 'Ngày không hợp lệ';
         }
     };
 
-    if (loading) return <LoadingSpinner />;
+    const handleDeleteAccount = async (e, customerId) => {
+        e.stopPropagation(); // Ngăn chặn việc navigate khi click nút xóa
+        setSelectedCustomerId(customerId);
+        setIsConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        setLoading(true)
+        try {
+            await deleteUserById(selectedCustomerId);
+            setCustomers(prevCustomers =>
+                prevCustomers.filter(customer => customer.id !== selectedCustomerId)
+            );
+            setLoading(false)
+            setNotification({
+                type: 'success',
+                message: 'Xóa tài khoản thành công'
+            });
+        } catch (error) {
+            setNotification({
+                type: 'error',
+                message: error.message || 'Xóa tài khoản thất bại'
+            });
+        } finally {
+            setIsConfirmOpen(false);
+            setSelectedCustomerId(null);
+        }
+    };
+
+    const handleUpdateStatus = async (customerId, newStatus) => {
+        try {
+            await updateUserStatus(customerId, newStatus === 'active');
+            setCustomers(customers.map(customer =>
+                customer.id === customerId
+                    ? { ...customer, status: newStatus }
+                    : customer
+            ));
+            setNotification({
+                type: 'success',
+                message: `${newStatus === 'active' ? 'Mở khóa' : 'Khóa'} tài khoản thành công`
+            });
+        } catch (error) {
+            setNotification({
+                type: 'error',
+                message: error.message || 'Cập nhật trạng thái thất bại'
+            });
+        }
+    };
+
+    if (loading) return <Loading />;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            <Helmet>
+                <title>Danh sách khách hàng</title>
+            </Helmet>
+            <ConfirmDialog
+                isOpen={isConfirmOpen}
+                title="Xóa tài khoản"
+                message="Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác."
+                onConfirm={handleConfirmDelete}
+                onClose={() => {
+                    setIsConfirmOpen(false);
+                    setSelectedCustomerId(null);
+                }}
+            />
+            {notification && (
+                <Notification
+                    type={notification.type}
+                    message={notification.message}
+                    onClose={() => setNotification(null)}
+                />
+            )}
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -304,19 +292,38 @@ const CustomerListPage = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 flex items-center gap-1">
                                                 <FiShoppingBag className="text-gray-400" />
-                                                {customer.totalOrders} đơn
+                                                {customer.totalOrders > 0 ? (
+                                                    <span>{customer.totalOrders} đơn</span>
+                                                ) : (
+                                                    <span className="text-gray-500">Chưa có đơn hàng</span>
+                                                )}
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                                Gần nhất: {formatDate(customer.lastOrder)}
+                                                {customer.lastOrder ? (
+                                                    <>Gần nhất: {formatDate(customer.lastOrder)}</>
+                                                ) : (
+                                                    'Chưa có đơn hàng'
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">
-                                                {formatPrice(customer.totalSpent)}
+                                                {customer.totalSpent > 0 ? (
+                                                    formatPrice(customer.totalSpent)
+                                                ) : (
+                                                    <span className="text-gray-500">0 ₫</span>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <ConditionCustom type={customer.status === 'active' ? 'success' : 'danger'} text={customer.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'} />
+                                            <ConditionCustom
+                                                type={customer.status === 'active' ? 'success' : 'danger'}
+                                                text={customer.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
+                                                onClick={() => handleUpdateStatus(
+                                                    customer.id,
+                                                    customer.status === 'active' ? 'inactive' : 'active'
+                                                )}
+                                            />
                                         </td>
                                         <td className=" py-4 px-9 gap-2 whitespace-nowrap text-right text-sm font-medium">
                                             <ButtonDelete

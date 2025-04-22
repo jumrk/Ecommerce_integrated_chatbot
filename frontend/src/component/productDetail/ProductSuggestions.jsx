@@ -1,9 +1,30 @@
 import React from 'react';
 import CardProduct from '../card/CardProduct';
+
 const ProductSuggestions = ({ products, currentProductId }) => {
-    const suggestedProducts = products
-        .filter(product => product.id !== currentProductId)
-        .slice(0, 4);
+    const currentProduct = products.find(product => product._id === currentProductId);
+    const currentCategoryId = currentProduct ? currentProduct.category._id : null;
+
+    // Lấy sản phẩm cùng danh mục (so sánh bằng category._id)
+    let suggestedProducts = products
+        .filter(product =>
+            product._id !== currentProductId &&
+            product.category._id === currentCategoryId
+        );
+
+    if (suggestedProducts.length < 4) {
+        const additionalProducts = products
+            .filter(product =>
+                product._id !== currentProductId &&
+                product.category._id !== currentCategoryId
+            )
+            .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+            .slice(0, 4 - suggestedProducts.length);
+        suggestedProducts = [...suggestedProducts, ...additionalProducts];
+    }
+
+    suggestedProducts = suggestedProducts.slice(0, 4);
+
     return (
         <div className="mt-8 w-full">
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -19,8 +40,9 @@ const ProductSuggestions = ({ products, currentProductId }) => {
 
                             return (
                                 <CardProduct
-                                    key={product.id}
+                                    key={product._id}
                                     {...product}
+                                    discountedPrice={discountedPrice}
                                 />
                             );
                         })}
